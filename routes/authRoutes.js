@@ -75,7 +75,8 @@ router.post('/signup',[
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const {email,password,token}=req.body
+    // const {email,password,captchaToken}=req.body
+    const {email,password}=req.body
     try {
       let user=await User.findOne({email})
       if(!user){
@@ -86,9 +87,9 @@ router.post('/signup',[
         return res.status(400).json({success,error:"Please enter correct credentials"});
       }
       //verifying captcha
-      const response = await axios.post(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`
-      );
+      // const response = await axios.post(
+      //   `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}&render=explicit`
+      // );
       if (!response.data.success) {
         return res.status(400).json({success,error:"Not a human"});
       } 

@@ -16,7 +16,7 @@ const ProfileSchema = new mongoose.Schema({
     country: {type: String,required: true},
     phone: {type: Number,required: true,unique: true},
     birthdate: {type: Date,required: true},
-    image: {type: String,required: true},
+    image: {type: String,required: false},
     dralawalletaddress: {type: String,required: false},
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     
