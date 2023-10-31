@@ -75,7 +75,7 @@ router.post('/signup',[
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const {email,password}=req.body
+    const {email,password,token}=req.body
     try {
       let user=await User.findOne({email})
       if(!user){
@@ -85,6 +85,13 @@ router.post('/signup',[
       if(!comparePass){
         return res.status(400).json({success,error:"Please enter correct credentials"});
       }
+      //verifying captcha
+      const response = await axios.post(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`
+      );
+      if (!response.data.success) {
+        return res.status(400).json({success,error:"Not a human"});
+      } 
   
       const data={
         user:{
@@ -132,11 +139,7 @@ router.post('/signup',[
       res.status(500).send("Internal server error")
       console.log(err)
     }
+})
 
-    
-
-    })
-  
-  
 
 module.exports = router
