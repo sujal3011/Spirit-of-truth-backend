@@ -90,9 +90,9 @@ router.post('/signup',[
       // const response = await axios.post(
       //   `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}&render=explicit`
       // );
-      if (!response.data.success) {
-        return res.status(400).json({success,error:"Not a human"});
-      } 
+      // if (!response.data.success) {
+      //   return res.status(400).json({success,error:"Not a human"});
+      // } 
   
       const data={
         user:{
@@ -101,7 +101,7 @@ router.post('/signup',[
       }
       const token=jwt.sign(data,secret_key)  
       success=true;
-      res.json({success,token})
+      res.json({success:true,token:token,email:user.email});
     
   
     } catch (error) {
@@ -109,30 +109,51 @@ router.post('/signup',[
     }
   })
 
-  router.post('/create-profile', async (req, res) => {
+  router.post('/create-profile',[
+    // body('firstname', 'Enter a valid firstname ').isLength({ min: 1 }),
+    // body('lastname', 'Enter a valid lastname ').isLength({ min: 1 }), 
+    // body('sex', 'Enter a valid gender').isLength({ min: 1 }), 
+    // body('addressline1', 'Enter a valid address').isLength({ min: 1 }), 
+    // body('birthdate', 'Enter a valid birthdate').isLength({ min: 1 }), 
+    // body('state', 'Enter a valid state name').isLength({ min: 1 }), 
+    // body('city', 'Enter a valid city name').isLength({ min: 1 }), 
+    // body('country', 'Enter a valid country name').isLength({ min: 1 }), 
+    // body('phone', 'Enter a valid country name').isLength({ min: 1 }), 
+    // body('phone', 'Enter a valid phone number').isLength({ min: 1 }), 
+    // body('zipcode', 'Enter a valid zipcode').isLength({ min: 1 }),
+    // body('user', 'Enter a valid user Id').isLength({ min: 1 }),
+    // body('email', 'Enter a valid email ').isEmail(),
+  ], async (req, res) => {
+
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   console.log("something is invalid");
+    //   return res.status(400).json({ success:false,errors: errors.array() });
+    // }
 
     try {
+      console.log(req.body);
 
       let profile = await Profile.create({
 
-        firstname: req.body.firstname,
-        middlename: req.body.middlename,
-        lastname: req.body.lastname,
-        spiritualname: req.body.spiritualname,
+        firstname: req.body.firstName,
+        middlename: req.body.middleName,
+        lastname: req.body.lastName,
+        spiritualname: req.body.spiritualName,
         sex: req.body.sex,
-        addressline1: req.body.addressline1,
-        addressline2: req.body.addressline2,
+        addressline1: req.body.addressFirstLine,
+        addressline2: req.body.addressSecondeLine,
         state: req.body.state,
         city: req.body.city,
-        zipcode: req.body.zipcode,
+        zipcode: req.body.zipCode,
         country: req.body.country,
-        phone: req.body.phone,
-        birthdate: req.body.birthdate,
-        image: req.body.image,
-        dralawalletaddress: req.body.dralawalletaddress,
-        user: req.body.user,
+        phone: Number(req.body.phoneNumber),
+        birthdate: req.body.date,
+        // image: req.body.image,
+        dralawalletaddress: req.body.dralaWalletAdress,
+        email: req.body.email,
       })
-      res.status(201).json(profile);
+      res.status(201).json({success:true,profile:profile});
 
 
       

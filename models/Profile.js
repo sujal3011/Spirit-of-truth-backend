@@ -12,13 +12,13 @@ const ProfileSchema = new mongoose.Schema({
     addressline2: {type: String,required: false},
     state: {type: String,required: true},
     city: {type: String,required: true},
-    zipcode: {type: Number,required: true},
+    zipcode: {type: String,required: true},
     country: {type: String,required: true},
     phone: {type: Number,required: true,unique: true},
     birthdate: {type: Date,required: true},
     image: {type: String,required: false},
     dralawalletaddress: {type: String,required: false},
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    email: {type: String,required: true},
     
 },{ timestamps: true });
 const Profile=mongoose.model('profile', ProfileSchema);
