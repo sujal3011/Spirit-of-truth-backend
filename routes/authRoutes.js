@@ -110,26 +110,24 @@ router.post('/signup',[
   })
 
   router.post('/create-profile',[
-    // body('firstname', 'Enter a valid firstname ').isLength({ min: 1 }),
-    // body('lastname', 'Enter a valid lastname ').isLength({ min: 1 }), 
-    // body('sex', 'Enter a valid gender').isLength({ min: 1 }), 
-    // body('addressline1', 'Enter a valid address').isLength({ min: 1 }), 
-    // body('birthdate', 'Enter a valid birthdate').isLength({ min: 1 }), 
-    // body('state', 'Enter a valid state name').isLength({ min: 1 }), 
-    // body('city', 'Enter a valid city name').isLength({ min: 1 }), 
-    // body('country', 'Enter a valid country name').isLength({ min: 1 }), 
-    // body('phone', 'Enter a valid country name').isLength({ min: 1 }), 
-    // body('phone', 'Enter a valid phone number').isLength({ min: 1 }), 
-    // body('zipcode', 'Enter a valid zipcode').isLength({ min: 1 }),
-    // body('user', 'Enter a valid user Id').isLength({ min: 1 }),
-    // body('email', 'Enter a valid email ').isEmail(),
+    body('firstName', 'Enter a valid firstname ').isLength({ min: 1 }),
+    body('lastName', 'Enter a valid lastname ').isLength({ min: 1 }), 
+    body('sex', 'Enter a valid gender').isLength({ min: 1 }), 
+    body('addressFirstLine', 'Enter a valid address').isLength({ min: 1 }), 
+    body('date', 'Enter a valid birthdate').isLength({ min: 1 }), 
+    body('state', 'Enter a valid state name').isLength({ min: 1 }), 
+    body('city', 'Enter a valid city name').isLength({ min: 1 }), 
+    body('country', 'Enter a valid country name').isLength({ min: 1 }), 
+    body('phoneNumber', 'Enter a valid country name').isLength({ min: 1 }), 
+    body('zipCode', 'Enter a valid zipcode').isLength({ min: 1 }),
+    body('email', 'Enter a valid email ').isEmail(),
   ], async (req, res) => {
 
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   console.log("something is invalid");
-    //   return res.status(400).json({ success:false,errors: errors.array() });
-    // }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log("something is invalid");
+      return res.status(400).json({ success:false,errors: errors.array() });
+    }
 
     try {
       console.log(req.body);
