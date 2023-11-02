@@ -78,7 +78,8 @@ async function verifyRecaptcha(recaptchaResponse) {
       null,
       {
         params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
+          // secret: process.env.RECAPTCHA_SECRET_KEY,
+          secret: "6LfWreQoAAAAAOOPZERy_flGvmupe8vG-1XdcFfM",
           response: recaptchaResponse,
         },
       }
