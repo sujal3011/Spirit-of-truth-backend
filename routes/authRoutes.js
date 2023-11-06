@@ -8,11 +8,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const otpController = require("../controllers/otpController");
 const axios = require('axios');
+const Token = require("../models/Token");
+const crypto = require("crypto");
+const mailSender = require("../utils/mailSender");
+const multer = require('multer');
 
 const secret_key = process.env.SECRET_KEY;
 
 router.post("/send-otp", otpController.sendOTP);
 
+//User SignUp
 router.post(
   "/signup",
   [
@@ -91,7 +96,7 @@ async function verifyRecaptcha(recaptchaResponse) {
     return false;
   }
 }
-
+//User Login
 router.post(
   "/login",
   [
@@ -121,13 +126,9 @@ router.post(
           .json({ success, error: "Please enter correct credentials" });
       }
       // verifying captcha
-      const isRecaptchaValid = await verifyRecaptcha(captchaToken);
-      if (!isRecaptchaValid) {
-        // console.log("recatcha not verified");
-        return res.status(400).json({ error: "reCAPTCHA verification failed" });
-      }
-      // else{
-      //   console.log("recatcha successfully verified");
+      // const isRecaptchaValid = await verifyRecaptcha(captchaToken);
+      // if (!isRecaptchaValid) {
+      //   return res.status(400).json({ error: "reCAPTCHA verification failed" });
       // }
 
       const data = {
@@ -135,15 +136,46 @@ router.post(
           id: user.id,
         },
       };
-      const token = jwt.sign(data, secret_key);
+      const token = jwt.sign(data, secret_key)
       success = true;
-      res.json({ success: true, token: token, email: user.email });
+      res.json({ success: true, token: token, user: user});
     } catch (error) {
       res.status(500).send("Internal server error");
     }
   }
 );
 
+//Get Profile
+router.post(
+  "/get-profile",
+  [
+    body("email", "Enter a valid email ").isEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {email} = req.body;
+    try {
+      let profile = await Profile.findOne({ email });
+      if (!profile) {
+        return res.status(400).json({ success:false,error: "Profile do not exist" });
+      }
+      else{
+        res.json({ success: true, profile:profile});
+      }
+    } catch (error) {
+      res.status(500).send("Internal server error");
+    }
+  }
+);
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+//Create Profile
 router.post(
   "/create-profile",
   [
@@ -158,8 +190,11 @@ router.post(
     body("phoneNumber", "Enter a valid country name").isLength({ min: 1 }),
     body("zipCode", "Enter a valid zipcode").isLength({ min: 1 }),
     body("email", "Enter a valid email ").isEmail(),
+    body("profileImage", "Select a valid image").isLength({ min: 1 }),
   ],
   async (req, res) => {
+    // console.log(req.body);
+    // console.log(req.file);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log("something is invalid");
@@ -167,7 +202,10 @@ router.post(
     }
 
     try {
-      console.log(req.body);
+      // console.log(req.body);
+      // console.log(req.body.profileImage);
+      // const imageBuffer = req.file.buffer;
+      // const contentType = req.file.mimetype;
 
       let profile = await Profile.create({
         firstname: req.body.firstName,
@@ -183,7 +221,7 @@ router.post(
         country: req.body.country,
         phone: Number(req.body.phoneNumber),
         birthdate: req.body.date,
-        // image: req.body.image,
+        image: req.body.profileImage,
         dralawalletaddress: req.body.dralaWalletAdress,
         email: req.body.email,
       });
@@ -194,5 +232,57 @@ router.post(
     }
   }
 );
+
+//sending the password reset email
+router.post("/reset-password", async (req, res) => {
+  try {
+
+      const user = await User.findOne({ email: req.body.email });
+      if (!user)
+          return res.status(400).send("User with given email doesn't exist");
+
+      let token = await Token.findOne({ userId: user._id });
+      if (!token) {
+          token = await new Token({
+              userId: user._id,
+              token: crypto.randomBytes(32).toString("hex"),
+          }).save();
+      }
+      // Link needs to be changed
+      const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
+      await mailSender(user.email, "Password reset", link);
+
+      res.send("password reset link sent to your email account");
+  } catch (error) {
+      res.send("An error occured");
+      console.log(error);
+  }
+});
+
+//reseting the password
+router.post("/reset-password/:userId/:token", async (req, res) => {
+  try {
+      const user = await User.findById(req.params.userId);
+      if (!user) return res.status(400).send("invalid link or expired");
+
+      const token = await Token.findOne({
+          userId: user._id,
+          token: req.params.token,
+      });
+      if (!token) return res.status(400).send("Invalid link or expired");
+
+      const salt = await bcrypt.genSalt(10);
+      const secPass = await bcrypt.hash(req.body.password, salt);
+      user.password = secPass;
+      await user.save();
+      await token.delete();
+
+      res.send("password reset sucessfully.");
+  } catch (error) {
+      res.send("An error occured");
+      console.log(error);
+  }
+});
+
 
 module.exports = router;
