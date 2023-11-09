@@ -233,6 +233,73 @@ router.post(
   }
 );
 
+//Update Profile
+router.put(
+  "/update-profile/:userId",
+  [
+    body("firstName", "Enter a valid firstname ").isLength({ min: 1 }),
+    body("lastName", "Enter a valid lastname ").isLength({ min: 1 }),
+    body("sex", "Enter a valid gender").isLength({ min: 1 }),
+    body("addressFirstLine", "Enter a valid address").isLength({ min: 1 }),
+    body("date", "Enter a valid birthdate").isLength({ min: 1 }),
+    body("state", "Enter a valid state name").isLength({ min: 1 }),
+    body("city", "Enter a valid city name").isLength({ min: 1 }),
+    body("country", "Enter a valid country name").isLength({ min: 1 }),
+    body("phoneNumber", "Enter a valid country name").isLength({ min: 1 }),
+    body("zipCode", "Enter a valid zipcode").isLength({ min: 1 }),
+    body("email", "Enter a valid email ").isEmail(),
+    body("profileImage", "Select a valid image").isLength({ min: 1 }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log("something is invalid");
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    try {
+      let user = await User.findById(req.params.userId);
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      let profile = await Profile.findOne({ email: user.email });
+      if (!profile) {
+        return res.status(404).send("Profile not found");
+      }
+      if(profile.email!==req.body.email){
+        return res.status(401).send("Not authorized");
+      }
+      // console.log(user);
+      // console.log(profile);
+
+      const newProfile = {
+        firstname: req.body.firstName,
+        middlename: req.body.middleName,
+        lastname: req.body.lastName,
+        spiritualname: req.body.spiritualName,
+        sex: req.body.sex,
+        addressline1: req.body.addressFirstLine,
+        addressline2: req.body.addressSecondeLine,
+        state: req.body.state,
+        city: req.body.city,
+        zipcode: req.body.zipCode,
+        country: req.body.country,
+        phone: Number(req.body.phoneNumber),
+        birthdate: req.body.date,
+        image: req.body.profileImage,
+        dralawalletaddress: req.body.dralaWalletAdress,
+        email: req.body.email,
+      };
+      const profileId=profile._id;
+      profile = await Profile.findByIdAndUpdate(profileId, { $set: newProfile }, { new: true });
+      res.status(200).json({ success: true, profile: profile });
+    } catch (err) {
+      res.status(500).send("Internal server error");
+      console.log(err);
+    }
+  }
+);
+
 //sending the password reset email
 router.post("/reset-password", async (req, res) => {
   try {
