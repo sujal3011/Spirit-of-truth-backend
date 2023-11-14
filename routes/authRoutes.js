@@ -145,6 +145,11 @@ router.post(
   }
 );
 
+//User logout
+router.post(
+  "/logout",
+);
+
 //Get Profile
 router.post(
   "/get-profile",
@@ -193,8 +198,7 @@ router.post(
     body("profileImage", "Select a valid image").isLength({ min: 1 }),
   ],
   async (req, res) => {
-    // console.log(req.body);
-    // console.log(req.file);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log("something is invalid");
@@ -202,10 +206,6 @@ router.post(
     }
 
     try {
-      // console.log(req.body);
-      // console.log(req.body.profileImage);
-      // const imageBuffer = req.file.buffer;
-      // const contentType = req.file.mimetype;
 
       let profile = await Profile.create({
         firstname: req.body.firstName,
