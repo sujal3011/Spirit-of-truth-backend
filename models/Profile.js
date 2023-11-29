@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 
 const ProfileSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
     firstname: {type: String,required: true},
     middlename: {type: String,required: false},
     lastname: {type: String,required: true},

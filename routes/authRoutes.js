@@ -224,6 +224,7 @@ router.post(
         image: req.body.profileImage,
         dralawalletaddress: req.body.dralaWalletAdress,
         email: req.body.email,
+        user:req.body.user,
       });
       res.status(201).json({ success: true, profile: profile });
     } catch (err) {
@@ -348,6 +349,70 @@ router.post("/reset-password/:userId/:token", async (req, res) => {
   } catch (error) {
       res.send("An error occured");
       console.log(error);
+  }
+});
+
+//getting all profiles
+router.get('/get-all-profiles', async (req, res) => {
+  try {
+    const profiles = await Profile.find();
+    const totalProfiles = profiles.length;
+    res.status(200).json({ totalProfiles, profiles });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//getting profile of an user from user id
+router.get('/get-userprofile/:userId', async (req, res) => {
+
+  const userId = req.params.userId;
+  try {
+    // console.log(typeof(userId));
+    const profile = await Profile.findOne({ user: userId }).populate('user');
+    if (!profile) {
+      return res.status(404).json({ message: 'User profile not found' });
+    }
+    return res.json(profile);
+  } catch (err) {
+    return res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
+//blocking a particular user
+router.put('/blockuser/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    user.isUserBlocked = true;
+    await user.save();
+    return res.status(200).json({ message: 'User blocked successfully', user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+//unblocking a particular user
+router.put('/unblockuser/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    user.isUserBlocked = false;
+    await user.save();
+    return res.status(200).json({ message: 'User unblocked successfully', user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
