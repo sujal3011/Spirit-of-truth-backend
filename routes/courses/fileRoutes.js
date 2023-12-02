@@ -36,13 +36,20 @@ conn.once('open', () => {
 
 //uploading a new pdf
 router.post('/upload/:sectionId', upload.single('file'), async (req, res) => {
-    
+
     try {
+        const section = await Section.findById(req.params.sectionId);
+        if(!section){
+            return res.status(404).json({ message: 'Section do not exist' });
+        }
+    
       const newFile = new File({
         sectionId: req.params.sectionId, originalname: req.file.originalname, fileId: req.file.id
       })
       const savedFile = await newFile.save();
-      res.json(savedFile);
+      section.pdfs.push(newFile._id);
+      await section.save();
+      res.status(201).json({ success: true, savedFile: savedFile,updatedSection:section });
 
     } catch (error) {
       res.status(500).send(error)
