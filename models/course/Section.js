@@ -9,8 +9,13 @@ const SectionSchema = new mongoose.Schema({
     },
     title: {type: String,required: true},
     body: {type: String,required: true},
-    videoUrl: {type: String,required: true},
-    pdfs: [File], // Array of PDFs associated with the section
+    videoUrl: {type: String,required: false},
+    pdfs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'file'
+        }
+    ],
   },{ timestamps: true });
   
   const Section = mongoose.model('section', SectionSchema);

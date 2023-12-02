@@ -8,7 +8,12 @@ const ModuleSchema = new mongoose.Schema({
         ref:'course'
     },
     title: {type: String,required: true},
-    sections: [Section],
+    sections: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'section'
+        }
+    ],
   },{ timestamps: true });
   
   const Module = mongoose.model('module', ModuleSchema);

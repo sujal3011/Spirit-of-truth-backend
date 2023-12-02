@@ -39,6 +39,17 @@ app.use('/api/auth',auth);
 const editRoutes=require('./routes/editRoutes');
 app.use('/api/changes',editRoutes);
 
+const courseRoutes=require('./routes/courses/courseRoutes');
+app.use('/api/courses/course',courseRoutes);
+
+const moduleRoutes=require('./routes/courses/moduleRoutes');
+app.use('/api/courses/module',moduleRoutes);
+
+const sectionRoutes=require('./routes/courses/sectionRoutes');
+app.use('/api/courses/section',sectionRoutes);
+
+const fileRoutes=require('./routes/courses/fileRoutes');
+app.use('/api/courses/file',fileRoutes);
 
 
 
