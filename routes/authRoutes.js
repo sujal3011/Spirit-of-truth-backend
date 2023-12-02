@@ -214,7 +214,7 @@ router.post(
         spiritualname: req.body.spiritualName,
         sex: req.body.sex,
         addressline1: req.body.addressFirstLine,
-        addressline2: req.body.addressSecondeLine,
+        addressline2: req.body.addressSecondLine,
         state: req.body.state,
         city: req.body.city,
         zipcode: req.body.zipCode,
@@ -280,7 +280,7 @@ router.put(
         spiritualname: req.body.spiritualName,
         sex: req.body.sex,
         addressline1: req.body.addressFirstLine,
-        addressline2: req.body.addressSecondeLine,
+        addressline2: req.body.addressSecondLine,
         state: req.body.state,
         city: req.body.city,
         zipcode: req.body.zipCode,
@@ -415,6 +415,8 @@ router.put('/unblockuser/:userId', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 
 
 module.exports = router;

@@ -36,6 +36,12 @@ app.get("/", (req, res) => {
 const auth=require('./routes/authRoutes');
 app.use('/api/auth',auth);
 
+const editRoutes=require('./routes/editRoutes');
+app.use('/api/changes',editRoutes);
+
+
+
+
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);
 });
