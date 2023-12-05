@@ -16,7 +16,7 @@ const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
 
 
-//Creating a new module
+// Creating a new module
 router.post(
     "/create/:courseId",
     [
@@ -50,5 +50,19 @@ router.post(
       }
     }
 );
+
+// Getting modules by course id
+router.get('/fetch/:courseId', async (req, res) => {
+  try {
+    const modules = await Module.find({courseId:req.params.courseId});
+    if (!modules) {
+      res.status(404).json({ error: 'Modules not found' });
+    } else {
+      res.status(200).json({modules});
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 module.exports = router;

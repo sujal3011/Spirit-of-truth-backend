@@ -43,4 +43,18 @@ router.post(
     }
 );
 
+//Getting all course of a particular creator
+router.get(
+  "/fetch-by-creator/:creatorId", async (req, res) => {
+    try {
+      let courses = await Course.find({creatorId: req.params.creatorId});
+      res.status(201).json({ success: true, courses: courses});
+
+    } catch (err) {
+      res.status(500).send("Internal server error");
+      console.log(err);
+    }
+  }
+);
+
 module.exports = router;

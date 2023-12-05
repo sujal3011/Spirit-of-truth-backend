@@ -54,5 +54,19 @@ router.post(
     }
 );
 
+// Getting sections by module id
+router.get('/fetch/:moduleId', async (req, res) => {
+  try {
+    const sections = await Section.find({moduleId:req.params.moduleId});
+    if (!sections) {
+      res.status(404).json({ error: 'sections not found' });
+    } else {
+      res.status(200).json({sections});
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 module.exports = router;

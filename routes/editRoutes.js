@@ -40,7 +40,7 @@ router.post(
 
     try {
 
-      const profile = await EditProfile.findOne({ email:req.body.email });
+      let profile = await EditProfile.findOne({ email:req.body.email });
       if (profile) {
         return res.status(403).json({ success: false, errorMessage:' An edit profile request for this account is already pending' });
       } 
