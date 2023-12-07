@@ -43,7 +43,24 @@ router.post(
     }
 );
 
-//Getting all course of a particular creator
+//Getting all courses
+router.get(
+  "/", async (req, res) => {
+    try {
+      const { publishedStatus } = req.query;
+      let courses;
+      if(publishedStatus==="all") courses = await Course.find();
+      else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
+      else courses = await Course.find({publishedStatus: false});
+      res.status(201).json({ success: true, courses: courses});
+
+    } catch (err) {
+      res.status(500).send("Internal server error");
+      console.log(err);
+    }
+  }
+);
+
 router.get(
   "/fetch-by-creator/:creatorId", async (req, res) => {
     try {
@@ -56,5 +73,43 @@ router.get(
     }
   }
 );
+
+router.put('/publish/:courseId', async (req, res) => {
+  try {
+      const courseId = req.params.courseId;
+      const course = await Course.findByIdAndUpdate(
+          courseId,
+          { publishedStatus: true },
+          { new: true }
+      );
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+      res.json(course);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.put('/unpublish/:courseId', async (req, res) => {
+  try {
+      const courseId = req.params.courseId;
+      const course = await Course.findByIdAndUpdate(
+          courseId,
+          { publishedStatus : false },
+          { new: true }
+      );
+
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+
+      res.json(course);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 module.exports = router;

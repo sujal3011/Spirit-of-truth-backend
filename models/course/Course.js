@@ -8,12 +8,17 @@ const CourseSchema = new mongoose.Schema({
       ref:'user'
     },
     title: {type: String,required: true},
+    publishedStatus: {type: Boolean,default: false,required: false},
     modules: [
       {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'module'
       }
-  ],
+    ],
+    instructors: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    }]
   },{ timestamps: true });
   
   const Course = mongoose.model('course', CourseSchema);
