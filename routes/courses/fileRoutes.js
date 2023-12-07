@@ -54,7 +54,21 @@ router.post('/upload/:sectionId', upload.single('file'), async (req, res) => {
     } catch (error) {
       res.status(500).send(error)
     }
-  })
+})
+
+// Getting pdfs of a section
+router.get('/fetch/:sectionId', async (req, res) => {
+  try {
+    const pdfs = await File.find({sectionId:req.params.sectionId});
+    if (!pdfs) {
+      res.status(404).json({ error: 'pdfs not found' });
+    } else {
+      res.status(200).json({pdfs});
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 
 module.exports = router;
