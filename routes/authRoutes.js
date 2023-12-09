@@ -12,7 +12,8 @@ const Token = require("../models/Token");
 const crypto = require("crypto");
 const mailSender = require("../utils/mailSender");
 const multer = require('multer');
-
+const authenticateAdmin = require("../middleware/authenticateAdmin");
+const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
 const secret_key = process.env.SECRET_KEY;
 
 router.post("/send-otp", otpController.sendOTP);
@@ -27,7 +28,7 @@ router.post(
     }),
   ],
   async (req, res) => {
-    const { email, password, otp } = req.body;
+    const { email, password, roleType, otp } = req.body;
 
     let success = false;
     const errors = validationResult(req);
@@ -58,11 +59,13 @@ router.post(
       user = await User.create({
         email: email,
         password: secPass,
+        role: roleType,
       });
 
       const data = {
         user: {
           id: user.id,
+          role:user.role,
         },
       };
 
@@ -134,6 +137,7 @@ router.post(
       const data = {
         user: {
           id: user.id,
+          role:user.role,
         },
       };
       const token = jwt.sign(data, secret_key)

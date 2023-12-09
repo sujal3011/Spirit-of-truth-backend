@@ -14,11 +14,13 @@ const Course = require("../../models/course/Course");
 const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
+const authenticateAdmin =  require("../../middleware/authenticateAdmin");
+const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
 
 
 //Creating a new course
 router.post(
-    "/create",
+    "/create",authenticateAdminInstructor,
     [
       body("title", "Enter a valid title ").isLength({ min: 1 }),
     ],
@@ -74,7 +76,7 @@ router.get(
   }
 );
 
-router.put('/publish/:courseId', async (req, res) => {
+router.put('/publish/:courseId', authenticateAdmin , async (req, res) => {
   try {
       const courseId = req.params.courseId;
       const course = await Course.findByIdAndUpdate(
@@ -92,7 +94,7 @@ router.put('/publish/:courseId', async (req, res) => {
   }
 });
 
-router.put('/unpublish/:courseId', async (req, res) => {
+router.put('/unpublish/:courseId', authenticateAdmin ,async (req, res) => {
   try {
       const courseId = req.params.courseId;
       const course = await Course.findByIdAndUpdate(
