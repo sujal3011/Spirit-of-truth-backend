@@ -20,6 +20,8 @@ mongoose.connect(mongoURL);
 
 const db = mongoose.connection;
 
+
+
 db.on("error", (error) => {
   console.error("MongoDB connection error:", error);
 });
@@ -27,6 +29,20 @@ db.on("error", (error) => {
 db.once("open", () => {
   console.log("Successfully connected to MongoDB");
 });
+
+app.use((req, res, next)=>{
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, auth-token, Referer, User-Agent, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Preflight', true)
+
+  if (req.method === "OPTIONS") {
+      return res.status(200).end();
+  }
+  
+  next();
+})
 
 
 app.get("/", (req, res) => {
@@ -51,6 +67,8 @@ app.use('/api/courses/section',sectionRoutes);
 const fileRoutes=require('./routes/courses/fileRoutes');
 app.use('/api/courses/file',fileRoutes);
 
+const instructorRoutes=require('./routes/instructorRoutes');
+app.use('/api/instructors',instructorRoutes);
 
 
 app.listen(port, () => {

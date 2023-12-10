@@ -63,6 +63,22 @@ router.get(
   }
 );
 
+// Get course by id
+router.get(
+  "/:courseId", async (req, res) => {
+    try {
+      const course = await Course.findById(req.params.courseId);
+  
+      if (!course) {
+        return res.status(404).json({ success: false, message: 'Course not found' });
+      }
+      return res.status(200).json({ success: true, course });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+);
+
 router.get(
   "/fetch-by-creator/:creatorId", async (req, res) => {
     try {

@@ -75,7 +75,7 @@ router.post(
 );
 
 //fetching all edit user profile requests
-router.get('/edit-profile/requests',authenticateAdmin, async (req, res) => {
+router.get('/edit-profile/requests', async (req, res) => {
     try {
         const editProfileRequests = await EditProfile.find();
         return res.json({requests:editProfileRequests,totalEntries:editProfileRequests.length});
@@ -86,7 +86,7 @@ router.get('/edit-profile/requests',authenticateAdmin, async (req, res) => {
   });
 
 //fetching edited profile of a particular user
-router.get('/edit-profile/requests/:userId',authenticateAdmin, async (req, res) => {
+router.get('/edit-profile/requests/:userId', async (req, res) => {
   try {
     const newProfile = await EditProfile.findOne({user:req.params.userId});
     if(!newProfile){

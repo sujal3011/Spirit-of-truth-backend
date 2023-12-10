@@ -98,6 +98,7 @@ router.get('/downloadpdf/:id', async (req, res) => {
     });
 
   } catch (error) {
+    console.log("Error");
     res.status(500).json(error);
   }
 });
