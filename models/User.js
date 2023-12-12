@@ -5,6 +5,18 @@ const UserSchema = new mongoose.Schema({
     password: {type: String,required: true},
     role:{type: String, default: 'user',required:false},
     isUserBlocked:{type:Boolean, default:false, required:false},
+    coursesAssigned: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'course'
+        }
+    ],
+    coursesEnrolled: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'course'
+        }
+    ],
 
     
 },{ timestamps: true });

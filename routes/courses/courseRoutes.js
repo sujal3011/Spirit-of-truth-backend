@@ -10,6 +10,7 @@ const crypto = require("crypto");
 const mailSender = require("../../utils/mailSender");
 const multer = require('multer');
 
+const User=require("../../models/User");
 const Course = require("../../models/course/Course");
 const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
@@ -18,9 +19,9 @@ const authenticateAdmin =  require("../../middleware/authenticateAdmin");
 const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
 
 
-//Creating a new course
+// Creating a new course
 router.post(
-    "/create",authenticateAdminInstructor,
+    "/create",
     [
       body("title", "Enter a valid title ").isLength({ min: 1 }),
     ],
@@ -45,7 +46,7 @@ router.post(
     }
 );
 
-//Getting all courses
+// Getting all courses
 router.get(
   "/", async (req, res) => {
     try {
@@ -91,8 +92,8 @@ router.get(
     }
   }
 );
-
-router.put('/publish/:courseId', authenticateAdmin , async (req, res) => {
+// Publishing a course
+router.put('/publish/:courseId', async (req, res) => {
   try {
       const courseId = req.params.courseId;
       const course = await Course.findByIdAndUpdate(
@@ -109,8 +110,8 @@ router.put('/publish/:courseId', authenticateAdmin , async (req, res) => {
       res.status(500).json({ message: 'Server Error' });
   }
 });
-
-router.put('/unpublish/:courseId', authenticateAdmin ,async (req, res) => {
+// UnPublishing a course
+router.put('/unpublish/:courseId',async (req, res) => {
   try {
       const courseId = req.params.courseId;
       const course = await Course.findByIdAndUpdate(
@@ -129,5 +130,40 @@ router.put('/unpublish/:courseId', authenticateAdmin ,async (req, res) => {
       res.status(500).json({ message: 'Server Error' });
   }
 });
+
+// Enrolling user in Course
+router.post('/enroll/:courseId',async (req, res) => {
+  try {
+      const courseId = req.params.courseId;
+      const {userId} = req.body;
+      const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success:false, message: 'User not found' });
+        }
+        user.coursesEnrolled.push(courseId);
+        await user.save();
+        res.status(200).json({ success:true, user });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ success:false, message: 'Server Error' });
+  }
+});
+
+
+// Fetching enrolled courses of user
+router.get('/enrolled/:userId',async (req, res) => {
+  try {
+      const userId = req.params.userId;
+      const user = await User.findById(userId).populate('coursesEnrolled');
+        if (!user) {
+            return res.status(404).json({ success:false, message: 'User not found' });
+        }
+        res.status(200).json({ success:true, enrolledCourses:user.coursesEnrolled });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ success:false, message: 'Server Error' });
+  }
+});
+
 
 module.exports = router;
