@@ -142,10 +142,10 @@ router.post('/enroll/:courseId',async (req, res) => {
         }
         user.coursesEnrolled.push(courseId);
         await user.save();
-        res.status(200).json({ success:true, user });
+        return res.status(200).json({ success:true, user });
   } catch (err) {
       console.error(err);
-      res.status(500).json({ success:false, message: 'Server Error' });
+      return res.status(500).json({ success:false, message: 'Server Error' });
   }
 });
 

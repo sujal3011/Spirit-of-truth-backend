@@ -18,7 +18,11 @@ const CourseSchema = new mongoose.Schema({
     instructors: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
-    }]
+    }],
+    prerequisiteCourses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'course'
+  }]
   },{ timestamps: true });
   
   const Course = mongoose.model('course', CourseSchema);
