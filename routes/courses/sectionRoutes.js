@@ -82,5 +82,37 @@ router.get('/:sectionId', async (req, res) => {
   }
 });
 
+// PUT route to update a section by ID
+router.put('/update/:sectionId',  [
+  
+  body("title", "Enter a valid title ").isLength({ min: 1 }),
+  body("body", "Enter a valid body ").isLength({ min: 1 }),
+
+], async (req, res) => {
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log("something is invalid");
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+  try {
+      const sectionId = req.params.sectionId;
+      const { title, body, videoUrl } = req.body;
+
+      const section = await Section.findByIdAndUpdate(
+          sectionId,
+          { title, body, videoUrl },
+          { new: true }
+      );
+
+      if (!section) {
+          return res.status(404).json({ message: 'Section not found' });
+      }
+
+      res.status(200).json({ section });
+  } catch (error) {
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 module.exports = router;

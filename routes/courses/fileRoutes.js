@@ -103,6 +103,38 @@ router.get('/downloadpdf/:id', async (req, res) => {
   }
 });
 
+// Deleting a pdf
+router.delete('/:id', async (req, res) => {
+
+  try {
+
+    let file = await File.findById(req.params.id);
+    if (!file) {
+      return res.status(404).send("File not found");
+    }
+    // if (file.userId.toString() !== req.user.id) {
+    //   return res.status(401).send("You are not authorized.");
+    // }
+    file = await File.findByIdAndDelete(req.params.id);
+    gfs.delete(new mongoose.Types.ObjectId(file.fileId),
+      (error, data) => {
+        if (error) {
+          console.log(error);
+          return res.status(404).json(error);
+        }
+        res.status(200).json({
+          success: true,
+          message: `Pdf has been sucessfully deleted`
+        })
+      }
+    )
+
+  } catch (error) {
+    res.status(500).json(error);
+  }
+})
+
+
 
 
 
