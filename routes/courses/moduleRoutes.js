@@ -65,4 +65,21 @@ router.get('/fetch/:courseId', async (req, res) => {
   }
 });
 
+router.put('/:moduleId', async (req, res) => {
+  const moduleId = req.params.moduleId;
+  const { title } = req.body;
+  try {
+    const module = await Module.findByIdAndUpdate(
+      moduleId,
+      { $set: { title: title } },
+      { new: true }
+    );
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+    res.status(200).json({ message: 'Module title updated successfully', updatedModule: module });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating module title', error: error.message });
+  }
+});
 module.exports = router;

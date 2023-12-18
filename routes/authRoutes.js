@@ -28,7 +28,7 @@ router.post(
     }),
   ],
   async (req, res) => {
-    const { email, password, roleType, otp } = req.body;
+    const { email, password, otp } = req.body;
 
     let success = false;
     const errors = validationResult(req);
@@ -59,7 +59,6 @@ router.post(
       user = await User.create({
         email: email,
         password: secPass,
-        role: roleType,
       });
 
       const data = {
@@ -153,6 +152,37 @@ router.post(
 router.post(
   "/logout",
 );
+// Changing role to user
+router.put('/role/user/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const updatedUser = await User.findByIdAndUpdate(userId, { role: 'user' }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Changing role to instructor
+router.put('/role/instructor/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const updatedUser = await User.findByIdAndUpdate(userId, { role: 'instructor' }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 //Get Profile
 router.post(
@@ -211,7 +241,7 @@ router.post(
     body("state", "Enter a valid state name").isLength({ min: 1 }),
     body("city", "Enter a valid city name").isLength({ min: 1 }),
     body("country", "Enter a valid country name").isLength({ min: 1 }),
-    body("phoneNumber", "Enter a valid country name").isLength({ min: 1 }),
+    body("phoneNumber", "Enter a valid Phone number").isLength({ min: 1 }),
     body("zipCode", "Enter a valid zipcode").isLength({ min: 1 }),
     body("email", "Enter a valid email ").isEmail(),
     body("profileImage", "Select a valid image").isLength({ min: 1 }),

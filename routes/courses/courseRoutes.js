@@ -165,5 +165,19 @@ router.get('/enrolled/:userId',async (req, res) => {
   }
 });
 
+router.put('/:courseId', async (req, res) => {
+  const courseId = req.params.courseId;
+  const { title } = req.body;
+  try {
+    const updatedCourse = await Course.findByIdAndUpdate(courseId,{ title },{ new: true });
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    return res.json({ message: 'Course updated successfully', course: updatedCourse });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to update course', error });
+  }
+});
+
 
 module.exports = router;

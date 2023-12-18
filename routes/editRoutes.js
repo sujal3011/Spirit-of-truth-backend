@@ -151,7 +151,7 @@ router.put('/edit-profile/approve/:userId', async (req, res) => {
 });
 
 //disapproving edit request of user
-router.get('/edit-profile/disapprove/:userId', async (req, res) => {
+router.put('/edit-profile/disapprove/:userId', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if(!user){
