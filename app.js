@@ -70,6 +70,9 @@ app.use('/api/courses/file',fileRoutes);
 const instructorRoutes=require('./routes/instructorRoutes');
 app.use('/api/instructors',instructorRoutes);
 
+const testRoutes=require('./routes/courses/courseTestRoutes');
+app.use('/api/courses/test',testRoutes);
+
 
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);
