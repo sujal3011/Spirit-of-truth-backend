@@ -126,4 +126,25 @@ router.get('/question/:questionId', async (req, res) => {
   }
 });
 
+// Updating a question
+router.put('/question/:questionId', async (req, res) => {
+  const questionId = req.params.questionId;
+  const { statement, options, answer } = req.body;
+  try {
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      questionId,
+      { statement, options, answer },
+      { new: true }
+    );
+
+    if (!updatedQuestion) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    res.json({ message: 'Question updated successfully', question: updatedQuestion });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating question', error: err.message });
+  }
+});
+
 module.exports = router;

@@ -8,6 +8,7 @@ const QuizSchema = new mongoose.Schema({
       ref:'user'
     },
     noOfQuestions: {type: Number,dafault:0,required: false},
+    passPercentage: {type: Number,dafault:80,required: false},
    
   },{ timestamps: true });
   

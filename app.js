@@ -73,6 +73,9 @@ app.use('/api/instructors',instructorRoutes);
 const testRoutes=require('./routes/courses/courseTestRoutes');
 app.use('/api/courses/test',testRoutes);
 
+const quizRoutes=require('./routes/quizRoutes');
+app.use('/api/quiz',quizRoutes);
+
 
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);
