@@ -37,6 +37,21 @@ router.post(
     }
 );
 
+// Getting a test by its id
+router.get('/:testId', async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    const test = await Test.findById(testId);
+    if (!test) {
+      return res.status(404).json({ success: false });
+    }
+    res.status(200).json({ success:true,test });
+  } catch (error) {
+    res.status(500).json({ success: false,message:"Internal Server Error" });
+  }
+});
+
 
 // Adding a new question to a Test
 router.post(
