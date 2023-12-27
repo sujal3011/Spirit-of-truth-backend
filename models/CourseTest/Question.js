@@ -11,6 +11,7 @@ const QuestionSchema = new mongoose.Schema({
         required: true
     },
     answer: {type: String,required: true},
+    questionNo: {type : Number,required:true},
    
 },{ timestamps: true });
   

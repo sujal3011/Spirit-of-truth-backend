@@ -12,6 +12,7 @@ const TestSchema = new mongoose.Schema({
       ref:'course'
     },
     noOfQuestions: {type: Number,dafault:0,required: false},
+    passPercentage: {type: Number,dafault:80,required: false},
    
   },{ timestamps: true });
   

@@ -24,6 +24,7 @@ router.post(
             title: req.body.title,
             creatorId: req.body.creatorId,
             passPercentage: req.body.passPercentage,
+            category:req.body.category,
         });
         res.status(201).json({ success: true, quiz: quiz });
 
@@ -33,6 +34,38 @@ router.post(
       }
     }
 );
+
+// Creating a new Quiz Category
+router.post('/category/add', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const createdQuizCategory = await QuizCategory.create({ name });
+
+    res.status(201).json({ success: true, category: createdQuizCategory });
+  } catch (err) {
+    res.status(400).json({ success:false,message: err.message });
+  }
+});
+
+// Updating a Quiz Category
+router.put('/category/update', async (req, res) => {
+  const { originalName,newName } = req.body;
+  try {
+    const updatedQuizCategory = await QuizCategory.findOneAndUpdate(
+      { name: originalName },
+      { name: newName },
+      { new: true }
+    );
+
+    if (!updatedQuizCategory) {
+      return res.status(404).json({ success:false,message: 'Quiz category not found' });
+    }
+
+    return res.status(200).json({ success: true, category:updatedQuizCategory });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
 
 // Getting all quizzes
 router.get('/all', async (req, res) => {
@@ -115,9 +148,9 @@ router.get('/question/:questionId', async (req, res) => {
 // Updating quiz details
 router.put('/update/:quizId', async (req, res) => {
   const { quizId } = req.params;
-  const { title,passPercentage } = req.body;
+  const { title,passPercentage,category} = req.body;
   try {
-      const updatedQuiz = await Quiz.findByIdAndUpdate(quizId, { title,passPercentage }, { new: true });
+      const updatedQuiz = await Quiz.findByIdAndUpdate(quizId, { title,passPercentage,category }, { new: true });
 
       if (!updatedQuiz) {
           return res.status(404).json({ success: false, message: 'Quiz not found' });

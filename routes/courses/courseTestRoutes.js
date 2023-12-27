@@ -53,6 +53,7 @@ router.post(
             testId: req.body.testId,
             options: req.body.options,
             answer: req.body.answer,
+            questionNo:req.body.questionNo,
     });
     // test.noOfQuestions += 1;
     // await test.save();
@@ -129,21 +130,21 @@ router.get('/question/:questionId', async (req, res) => {
 // Updating a question
 router.put('/question/:questionId', async (req, res) => {
   const questionId = req.params.questionId;
-  const { statement, options, answer } = req.body;
+  const { statement, options, answer,questionNo } = req.body;
   try {
     const updatedQuestion = await Question.findByIdAndUpdate(
       questionId,
-      { statement, options, answer },
+      { statement, options, answer, questionNo },
       { new: true }
     );
 
     if (!updatedQuestion) {
-      return res.status(404).json({ message: 'Question not found' });
+      return res.status(404).json({ success: false });
     }
 
-    res.json({ message: 'Question updated successfully', question: updatedQuestion });
+    res.json({ success:true, question: updatedQuestion });
   } catch (err) {
-    res.status(500).json({ message: 'Error updating question', error: err.message });
+    res.status(500).json({ success: true, error: err.message });
   }
 });
 
