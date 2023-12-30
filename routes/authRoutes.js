@@ -128,10 +128,10 @@ router.post(
           .json({ success, error: "Please enter correct credentials" });
       }
       // verifying captcha
-      const isRecaptchaValid = await verifyRecaptcha(captchaToken);
-      if (!isRecaptchaValid) {
-        return res.status(400).json({ error: "reCAPTCHA verification failed" });
-      }
+      // const isRecaptchaValid = await verifyRecaptcha(captchaToken);
+      // if (!isRecaptchaValid) {
+      //   return res.status(400).json({ error: "reCAPTCHA verification failed" });
+      // }
 
       const data = {
         user: {
