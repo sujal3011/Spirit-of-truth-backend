@@ -128,10 +128,10 @@ router.post(
           .json({ success, error: "Please enter correct credentials" });
       }
       // verifying captcha
-      // const isRecaptchaValid = await verifyRecaptcha(captchaToken);
-      // if (!isRecaptchaValid) {
-      //   return res.status(400).json({ error: "reCAPTCHA verification failed" });
-      // }
+      const isRecaptchaValid = await verifyRecaptcha(captchaToken);
+      if (!isRecaptchaValid) {
+        return res.status(400).json({ error: "reCAPTCHA verification failed" });
+      }
 
       const data = {
         user: {
@@ -256,6 +256,10 @@ router.post(
 
     try {
 
+      let user = await User.findById(req.body.user);
+      if (!user) {
+        return res.status(400).json({ success:false,message: "User not found" });
+      }
       let profile = await Profile.create({
         firstname: req.body.firstName,
         middlename: req.body.middleName,
@@ -275,6 +279,8 @@ router.post(
         email: req.body.email,
         user:req.body.user,
       });
+      user.accountStatus='profile_created';
+      await user.save();
       res.status(201).json({ success: true, profile: profile });
     } catch (err) {
       res.status(500).send("Internal server error");
@@ -282,6 +288,23 @@ router.post(
     }
   }
 );
+
+// Updating user account status
+router.put('/account-status/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { newStatus } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(userId, { accountStatus: newStatus }, { new: true });
+    if (!user) {
+      return res.status(404).json({ success:false,message: 'User not found' });
+    }
+    return res.json({ success:true,user });
+  } catch (error) {
+    return res.status(500).json({ success:false,error: 'Internal server error' });
+  }
+});
+
+
 
 //Update Profile
 router.put(
