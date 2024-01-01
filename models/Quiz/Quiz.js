@@ -7,7 +7,7 @@ const QuizSchema = new mongoose.Schema({
       type:mongoose.Schema.Types.ObjectId,
       ref:'user'
     },
-    category: {type:String,required:true},
+    publishedStatus: {type: Boolean,default: false,required: false},
     noOfQuestions: {type: Number,dafault:0,required: false},
     passPercentage: {type: Number,dafault:80,required: false},
    

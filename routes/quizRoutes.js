@@ -84,13 +84,15 @@ router.get('/get-by-id/:quizId', async (req, res) => {
 // Getting all quizzes
 router.get('/all', async (req, res) => {
     try {
-      const quizzes = await Quiz.find();
-      if(!quizzes){
-        return res.status(404).json({ success: false, message: 'Quizzes not found' });
-      }
-      res.status(200).json({ success: true, quizzes: quizzes });
+      const { publishedStatus } = req.query;
+      let quizzes;
+      if(publishedStatus==="all") quizzes = await Quiz.find();
+      else if(publishedStatus==="published") quizzes = await Quiz.find({publishedStatus: true});
+      else quizzes = await Quiz.find({publishedStatus: false});
+      res.status(201).json({ success: true, quizzes});
+
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      res.status(500).json({ success:false,message: err.message });
     }
   });
 
@@ -195,6 +197,45 @@ router.put('/question/:questionId', async (req, res) => {
     res.json({ success: true, question: updatedQuestion });
   } catch (err) {
     res.status(500).json({ success: true, error: err.message });
+  }
+});
+
+// Publishing a quiz
+router.put('/publish/:quizId', async (req, res) => {
+  try {
+      const quizId = req.params.quizId;
+      const quiz = await Quiz.findByIdAndUpdate(
+          quizId,
+          { publishedStatus: true },
+          { new: true }
+      );
+      if (!quiz) {
+          return res.status(404).json({ success:false,message: 'Quiz not found' });
+      }
+      res.json(quiz);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
+// UnPublishing a Quiz
+router.put('/unpublish/:quizId',async (req, res) => {
+  try {
+      const quizId = req.params.quizId;
+      const quiz = await Quiz.findByIdAndUpdate(
+          quizId,
+          { publishedStatus : false },
+          { new: true }
+      );
+
+      if (!quiz) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+
+      res.json(quiz);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
   }
 });
 

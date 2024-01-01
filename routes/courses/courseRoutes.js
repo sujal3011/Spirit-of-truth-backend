@@ -33,10 +33,15 @@ router.post(
         return res.status(400).json({ success: false, errors: errors.array() });
       }
       try {
-        let course = await Course.create({
-            title: req.body.title,
-            creatorId: req.body.creatorId
-        });
+
+        let courseData = {
+          title: req.body.title,
+          creatorId: req.body.creatorId
+        };
+        if (req.body.userRole === "instructor") {
+          courseData.instructors = [req.body.creatorId];
+        }
+        let course = await Course.create(courseData);
         res.status(201).json({ success: true, course: course });
 
       } catch (err) {

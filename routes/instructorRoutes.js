@@ -103,6 +103,24 @@ router.put('/deassign/:courseId', async (req, res) => {
     }
 });
 
+//Fetching all courses of an instructor
+router.get('/courses/:instructorId', async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+
+    // Find all courses where the 'instructors' array contains the given instructorId
+    const courses = await Course.find({ instructors: { $in: [instructorId] } });
+    if (!courses) {
+      return res.status(404).json({ success:false,message: 'Courses not found for this instructor' });
+    }
+
+    res.status(200).json({success:true,courses});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false,message: 'Server Error' });
+  }
+});
+
 
 
 
