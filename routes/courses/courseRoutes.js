@@ -55,11 +55,21 @@ router.post(
 router.get(
   "/", async (req, res) => {
     try {
-      const { publishedStatus } = req.query;
+      const { publishedStatus,courseType } = req.query;
       let courses;
-      if(publishedStatus==="all") courses = await Course.find();
-      else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
-      else courses = await Course.find({publishedStatus: false});
+      if(courseType==="individual"){
+
+        if(publishedStatus==="all") courses = await Course.find({courseType:'individual'});
+        else if(publishedStatus==="published") courses = await Course.find({courseType:'individual',publishedStatus: true});
+        else courses = await Course.find({courseType:'individual',publishedStatus: false});
+      }
+      else{
+
+        if(publishedStatus==="all") courses = await Course.find();
+        else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
+        else courses = await Course.find({publishedStatus: false});
+
+      }
       res.status(201).json({ success: true, courses: courses});
 
     } catch (err) {
@@ -170,6 +180,7 @@ router.get('/enrolled/:userId',async (req, res) => {
   }
 });
 
+// Updating a Course
 router.put('/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
   const { title } = req.body;

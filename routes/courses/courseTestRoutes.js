@@ -116,7 +116,7 @@ router.get(
     }
     const test = await Test.findOne({courseId:req.params.courseId});
     if(!test){
-        return res.status(404).json({ success: false, message: 'Test not found' });
+        return res.status(200).json({ success: false, message: 'Test not found' });
     }  
     res.status(200).json({ success: true, test: test });
 
