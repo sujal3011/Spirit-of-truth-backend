@@ -138,6 +138,44 @@ router.post('/courses/create/:coursebundleID', async (req, res) => {
   }
 });
 
+// Adding existing course in a bundle
+router.put('/courses/add/:coursebundleID/:courseId', async (req, res) => {
+
+  try {
+    
+      const { coursebundleID,courseId } = req.params;
+      // Updating the courseType of the course
+        const course = await Course.findById(courseId);
+        if (!course) {
+          return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+        course.courseType = 'bundle';
+        await course.save();
+    
+      // Updating the bundle
+    
+      const courseBundle = await CourseBundle.findById(coursebundleID);
+      if (!courseBundle) {
+        return res.status(404).json({ success:false,message: 'CourseBundle not found' });
+      }
+      const newCourse = {
+        courseId:courseId,
+        courseNo:0
+      };
+      courseBundle.courses.push(newCourse);
+      await courseBundle.save();
+    
+      res.json({ success:true,course,courseBundle });  
+  } catch (err) {
+    res.status(500).json({ success:false,message: 'Server Error' });
+  }
+
+
+
+  
+  
+});
+
 //Updating order of course in a bundle
 router.put('/courses/update/:coursebundleID/:courseId', async (req, res) => {
   try {
