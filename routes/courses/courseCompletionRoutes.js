@@ -78,4 +78,16 @@ router.get('/fetch/:userId/:courseId', async (req, res) => {
     }
   });
 
+// Fetching all passed courses of a user
+router.get('/passedCourses/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const passedCourses = await CourseCompletion.find({ userId, passingStatus: true }).populate('courseId');
+  
+      res.json({success:true,courses:passedCourses});
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;
