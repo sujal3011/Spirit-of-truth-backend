@@ -26,7 +26,8 @@ router.post(
         let test = await Test.create({
             title: req.body.title,
             creatorId: req.body.creatorId,
-            courseId: req.body.courseId
+            courseId: req.body.courseId,
+            passPercentage: req.body.passPercentage,
         });
         res.status(201).json({ success: true, test: test });
 
