@@ -47,7 +47,9 @@ router.post(
 
         let courseData = {
           title: req.body.title,
-          creatorId: req.body.creatorId
+          creatorId: req.body.creatorId,
+          isPaid:(req.body.courseType==='paid' ? true : false),
+          coursePrice:Number(req.body.coursePrice),
         };
         if (req.body.userRole === "instructor") {
           courseData.instructors = [req.body.creatorId];
@@ -201,9 +203,11 @@ router.get('/enrolled/:userId',async (req, res) => {
 // Updating a Course
 router.put('/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
-  const { title } = req.body;
+  const { title,type,coursePrice } = req.body;
+  const isPaid = (type === 'paid');
+  const updatedCoursePrice = (type === 'paid') ? coursePrice : 0;
   try {
-    const updatedCourse = await Course.findByIdAndUpdate(courseId,{ title },{ new: true });
+    const updatedCourse = await Course.findByIdAndUpdate(courseId,{ title, isPaid, coursePrice: updatedCoursePrice },{ new: true });
     if (!updatedCourse) {
       return res.status(404).json({ message: 'Course not found' });
     }

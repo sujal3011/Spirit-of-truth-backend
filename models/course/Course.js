@@ -20,6 +20,8 @@ const CourseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
     }],
+    isPaid: {type:Boolean,default:false,required:false},
+    coursePrice : {type:Number,default:0,required:false},
   },{ timestamps: true });
   
   const Course = mongoose.model('course', CourseSchema);
