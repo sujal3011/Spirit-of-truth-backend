@@ -15,6 +15,17 @@ const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
 
+const mongoose = require('mongoose');
+const mongoURL = process.env.MONGODB_URL
+const conn = mongoose.createConnection(mongoURL);
+
+let gfs;
+conn.once('open', () => {
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads'
+  });
+});
+
 
 //Creating a new section
 router.post(
@@ -114,5 +125,37 @@ router.put('/update/:sectionId',  [
       res.status(500).json({ message: 'Server Error' });
   }
 });
+
+router.delete('/:sectionId', async (req, res) => {
+  try {
+    const sectionId = req.params.sectionId;
+    const deletedSection = await Section.findByIdAndDelete(sectionId); 
+    console.log("section is :",deletedSection);   
+
+    if (deletedSection) {
+      // Deleting the pdfs of the section
+      for(let pdfId of deletedSection.pdfs){
+        let file = await File.findByIdAndDelete(pdfId);
+        if(file){
+          gfs.delete(new mongoose.Types.ObjectId(file.fileId),
+            (error, data) => {
+              if (error) {
+                console.log(error);
+                return res.status(404).json(error);
+              }
+            }
+          )
+        }
+      }
+      res.status(200).json({ success:true,message: 'Section deleted successfully'});
+    } else {
+      res.status(404).json({ success:false,error: 'Section not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success:false,error: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

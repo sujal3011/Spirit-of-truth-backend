@@ -69,7 +69,7 @@ router.get('/fetch/:userId/:courseId', async (req, res) => {
       const courseCompletion = await CourseCompletion.findOne({ userId, courseId });
   
       if (!courseCompletion) {
-        return res.status().json({ success:false,message: 'Not found.' });
+        return res.status(200).json({ success:false,message: 'Not found.' });
       }
   
       res.status(200).json({success:true,courseCompletion});

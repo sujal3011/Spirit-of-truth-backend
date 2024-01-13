@@ -18,6 +18,17 @@ const Section = require("../../models/course/Section");
 const authenticateAdmin =  require("../../middleware/authenticateAdmin");
 const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
 
+const mongoose = require('mongoose');
+const mongoURL = process.env.MONGODB_URL
+const conn = mongoose.createConnection(mongoURL);
+
+let gfs;
+conn.once('open', () => {
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads'
+  });
+});
+
 
 // Creating a new course
 router.post(
@@ -70,6 +81,10 @@ router.get(
         else courses = await Course.find({publishedStatus: false});
 
       }
+
+    // Sort courses alphabetically by title
+    courses.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+
       res.status(201).json({ success: true, courses: courses});
 
     } catch (err) {
@@ -155,6 +170,9 @@ router.post('/enroll/:courseId',async (req, res) => {
         if (!user) {
             return res.status(404).json({ success:false, message: 'User not found' });
         }
+        if (user.coursesEnrolled.includes(courseId)) {
+          return res.status(400).json({ success: false, message: 'User is already enrolled in this course' });
+        }
         user.coursesEnrolled.push(courseId);
         await user.save();
         return res.status(200).json({ success:true, user });
@@ -192,6 +210,72 @@ router.put('/:courseId', async (req, res) => {
     return res.json({ message: 'Course updated successfully', course: updatedCourse });
   } catch (error) {
     return res.status(500).json({ message: 'Failed to update course', error });
+  }
+});
+
+
+router.get('/check-enrolled/:userId/:courseId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const courseId = req.params.courseId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check if the user is enrolled in the specified course
+    const isEnrolled = user.coursesEnrolled.includes(courseId);
+
+    return res.status(200).json({ success: true, isEnrolled });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+});
+
+router.delete('/:courseId', async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+      // Deleting Course
+      const deletedCourse = await Course.findOneAndDelete({ _id: courseId });
+
+      if (deletedCourse) { 
+          // Finding modules and deleting sections and pdfs
+          const modules = await Module.find({ courseId });
+          for (const module of modules) {
+            const sections = await Section.find({moduleId:module._id});
+            for(let section of sections){
+              for(let pdfId of section.pdfs){
+                let file = await File.findByIdAndDelete(pdfId);
+                if(file){
+                  gfs.delete(new mongoose.Types.ObjectId(file.fileId),
+                    (error, data) => {
+                      if (error) {
+                        console.log(error);
+                        return res.status(404).json(error);
+                      }
+                    }
+                  )
+                }
+              }
+            }
+
+
+
+
+              await Section.deleteMany({ moduleId: module._id });
+          }
+          // Deleting Module
+          await Module.deleteMany({ courseId });
+          res.status(200).json({ success:true,message: 'Course deleted successfully.'});
+      } else {
+          res.status(404).json({ success:false,message: 'Course not found.' });
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success:false,message: 'Internal server error.' });
   }
 });
 
