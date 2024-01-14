@@ -53,6 +53,27 @@ router.get('/:testId', async (req, res) => {
   }
 });
 
+// Updating a test
+router.put('/:testId', async (req, res) => {
+  const testId = req.params.testId;
+  const { title, passPercentage } = req.body;
+
+  try {
+    const updatedTest = await Test.findByIdAndUpdate(
+      testId,
+      { title, passPercentage },
+      { new: true }
+    );
+    if (!updatedTest) {
+      return res.status(404).json({ success:false,error: 'Test not found' });
+    }
+    res.json({success:true,test:updatedTest});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success:false,error: 'Internal Server Error' });
+  }
+});
+
 
 // Adding a new question to a Test
 router.post(
