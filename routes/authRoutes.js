@@ -272,7 +272,7 @@ router.post(
         city: req.body.city,
         zipcode: req.body.zipCode,
         country: req.body.country,
-        phone: Number(req.body.phoneNumber),
+        phone: req.body.phoneNumber,
         birthdate: req.body.date,
         image: req.body.profileImage,
         dralawalletaddress: req.body.dralaWalletAdress,
@@ -318,7 +318,7 @@ router.put(
     body("state", "Enter a valid state name").isLength({ min: 1 }),
     body("city", "Enter a valid city name").isLength({ min: 1 }),
     body("country", "Enter a valid country name").isLength({ min: 1 }),
-    body("phoneNumber", "Enter a valid country name").isLength({ min: 1 }),
+    body("phoneNumber", "Enter a valid Phone number").isLength({ min: 1 }),
     body("zipCode", "Enter a valid zipcode").isLength({ min: 1 }),
     body("email", "Enter a valid email ").isEmail(),
     body("profileImage", "Select a valid image").isLength({ min: 1 }),
@@ -357,11 +357,12 @@ router.put(
         city: req.body.city,
         zipcode: req.body.zipCode,
         country: req.body.country,
-        phone: Number(req.body.phoneNumber),
+        phone: req.body.phoneNumber,
         birthdate: req.body.date,
         image: req.body.profileImage,
         dralawalletaddress: req.body.dralaWalletAdress,
         email: req.body.email,
+        notes: req.body.notes,
       };
       const profileId=profile._id;
       profile = await Profile.findByIdAndUpdate(profileId, { $set: newProfile }, { new: true });
@@ -485,6 +486,67 @@ router.put('/unblockuser/:userId', async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.put('/updateNotes/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const { notes } = req.body;
+
+  try {
+    const profile = await Profile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ success:false,msg: 'Profile not found for the given user ID' });
+    }
+    profile.notes = notes;
+    await profile.save();
+
+    res.json({ success:true,msg: 'Notes updated successfully', profile });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.put('/admin-change-password/:userId', async (req, res) => {
+ 
+  try {
+    const { newPassword } = req.body;
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success:true,msg: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+router.delete('/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    const profile = await Profile.findOne({ user: userId });
+
+    if (!user) {
+      return res.status(404).json({ success:false,message: 'User or profile not found' });
+    }
+    await user.remove();
+    await profile.remove();
+
+    res.json({ success:true,message: 'User and profile deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
