@@ -530,7 +530,6 @@ router.put('/admin-change-password/:userId', async (req, res) => {
   }
 });
 
-
 router.delete('/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;

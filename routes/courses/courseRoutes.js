@@ -184,6 +184,38 @@ router.post('/enroll/:courseId',async (req, res) => {
   }
 });
 
+// De enrolling user from Course
+router.post('/unenroll/:courseId',async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const {userId} = req.body;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the course is in the coursesEnrolled array
+    const index = user.coursesEnrolled.indexOf(courseId);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Course not found in coursesEnrolled' });
+    }
+
+    // Remove the course from the coursesEnrolled array
+    user.coursesEnrolled.splice(index, 1);
+
+    // Save the updated user
+    await user.save();
+
+    res.json({ message: 'Course removed successfully', user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 // Fetching enrolled courses of user
 router.get('/enrolled/:userId',async (req, res) => {
