@@ -16,6 +16,7 @@ const SectionSchema = new mongoose.Schema({
             ref: 'file'
         }
     ],
+    order: {type: Number,required: true},
   },{ timestamps: true });
   
   const Section = mongoose.model('section', SectionSchema);

@@ -48,11 +48,21 @@ router.post(
             return res.status(404).json({ message: 'Module do not exist' });
         }
 
+        const sections=await Section.find({moduleId:req.params.moduleId});
+
+        // Determine the order of the new module to be created
+        let order = 1;
+        if (sections && sections.length > 0) {
+          // If sections are present, find the maximum order and increment by 1
+          order = Math.max(...sections.map((section) => section.order), 0) + 1;
+        }
+
         let section = await Section.create({
             title: req.body.title,
             body: req.body.body,
             moduleId: req.params.moduleId,
-            videoUrl: req.body.videoUrl
+            videoUrl: req.body.videoUrl,
+            order: order,
         });
         module.sections.push(section._id);
         await module.save();

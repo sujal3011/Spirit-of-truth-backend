@@ -8,6 +8,7 @@ const ModuleSchema = new mongoose.Schema({
         ref:'course'
     },
     title: {type: String,required: true},
+    order: {type: Number,required: true},
     sections: [
         {
             type: mongoose.Schema.Types.ObjectId,
