@@ -65,29 +65,50 @@ router.post(
 );
 
 // Getting all courses
+// router.get(
+//   "/", async (req, res) => {
+//     try {
+//       const { publishedStatus,courseType } = req.query;
+//       let courses;
+//       if(courseType==="individual"){
+
+//         if(publishedStatus==="all") courses = await Course.find({courseType:'individual'});
+//         else if(publishedStatus==="published") courses = await Course.find({courseType:'individual',publishedStatus: true});
+//         else courses = await Course.find({courseType:'individual',publishedStatus: false});
+//       }
+//       else{
+
+//         if(publishedStatus==="all") courses = await Course.find();
+//         else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
+//         else courses = await Course.find({publishedStatus: false});
+
+//       }
+
+//     // Sort courses alphabetically by title
+//     courses.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+
+//       res.status(201).json({ success: true, courses: courses});
+
+//     } catch (err) {
+//       res.status(500).send("Internal server error");
+//       console.log(err);
+//     }
+//   }
+// );
+
 router.get(
   "/", async (req, res) => {
     try {
-      const { publishedStatus,courseType } = req.query;
+      const { publishedStatus } = req.query;
+
       let courses;
-      if(courseType==="individual"){
-
-        if(publishedStatus==="all") courses = await Course.find({courseType:'individual'});
-        else if(publishedStatus==="published") courses = await Course.find({courseType:'individual',publishedStatus: true});
-        else courses = await Course.find({courseType:'individual',publishedStatus: false});
-      }
-      else{
-
-        if(publishedStatus==="all") courses = await Course.find();
-        else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
-        else courses = await Course.find({publishedStatus: false});
-
-      }
+      if(publishedStatus==="all") courses = await Course.find();
+      else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
+      else courses = await Course.find({publishedStatus: false});
 
     // Sort courses alphabetically by title
     courses.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
-
-      res.status(201).json({ success: true, courses: courses});
+    res.status(201).json({ success: true, courses: courses});
 
     } catch (err) {
       res.status(500).send("Internal server error");
@@ -270,6 +291,7 @@ router.get('/check-enrolled/:userId/:courseId', async (req, res) => {
   }
 });
 
+// deleting a course
 router.delete('/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
 
@@ -312,6 +334,26 @@ router.delete('/:courseId', async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).json({ success:false,message: 'Internal server error.' });
+  }
+});
+
+// updating prerequisite courses of a course
+
+router.put('/prerequisiteCourses/:courseId', async (req, res) => {
+  const courseId = req.params.courseId;
+  const { prerequisiteCourses } = req.body;
+
+  try {
+      const updatedCourse = await Course.findByIdAndUpdate(
+          courseId,
+          { prerequisiteCourses },
+          { new: true }
+      );
+
+      res.json({ success: true, course: updatedCourse });
+  } catch (error) {
+      console.error('Error updating prerequisite courses:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

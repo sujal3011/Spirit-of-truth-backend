@@ -93,6 +93,7 @@ router.get('/courses/:coursebundleID', async (req, res) => {
   try {
     const coursebundleID = req.params.coursebundleID;
     const courseBundle = await CourseBundle.findById(coursebundleID).populate('courses.courseId');
+    // const courseBundle = await CourseBundle.findById(coursebundleID);
 
     if (!courseBundle) {
       return res.status(404).json({ success:false,message: 'CourseBundle not found' });

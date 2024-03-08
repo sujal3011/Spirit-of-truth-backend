@@ -22,6 +22,11 @@ const CourseSchema = new mongoose.Schema({
     }],
     isPaid: {type:Boolean,default:false,required:false},
     coursePrice : {type:Number,default:0,required:false},
+    
+    prerequisiteCourses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'course'
+  }]
   },{ timestamps: true });
   
   const Course = mongoose.model('course', CourseSchema);
