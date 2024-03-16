@@ -107,17 +107,22 @@ router.put('/deassign/:courseId', async (req, res) => {
 router.get('/courses/:instructorId', async (req, res) => {
   try {
     const { instructorId } = req.params;
+    const { approvalStatus } = req.query;
 
-    // Find all courses where the 'instructors' array contains the given instructorId
-    const courses = await Course.find({ instructors: { $in: [instructorId] } });
-    if (!courses) {
-      return res.status(404).json({ success:false,message: 'Courses not found for this instructor' });
+    let filter = { instructors: { $in: [instructorId] } };
+
+    if (approvalStatus === "approved") {
+      filter.approvalStatus = true;
+    } else if (approvalStatus === "pending") {
+      filter.approvalStatus = false;
     }
-
-    res.status(200).json({success:true,courses});
+    
+    // Find courses based on the filter
+    const courses = await Course.find(filter);
+    res.status(200).json({ success: true, courses });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success:false,message: 'Server Error' });
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 });
 

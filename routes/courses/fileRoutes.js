@@ -15,6 +15,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const readline = require('readline');
 
+const authenticateAdmin =  require("../../middleware/authenticateAdmin");
+const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
+
 const Course = require("../../models/course/Course");
 const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
@@ -35,16 +38,23 @@ conn.once('open', () => {
 
 
 //uploading a new pdf
-router.post('/upload/:sectionId', upload.single('file'), async (req, res) => {
+router.post('/upload/:sectionId',authenticateAdminInstructor, upload.single('file'), async (req, res) => {
 
     try {
         const section = await Section.findById(req.params.sectionId);
         if(!section){
             return res.status(404).json({ message: 'Section do not exist' });
         }
+
+        let approvalStatus;
+        if (req.user.role === 'instructor') {
+          approvalStatus = false;
+        } else {
+          approvalStatus = true;
+        }
     
       const newFile = new File({
-        sectionId: req.params.sectionId, originalname: req.file.originalname, fileId: req.file.id
+        sectionId: req.params.sectionId, originalname: req.file.originalname, fileId: req.file.id,approvalStatus: approvalStatus
       })
       const savedFile = await newFile.save();
       section.pdfs.push(newFile._id);

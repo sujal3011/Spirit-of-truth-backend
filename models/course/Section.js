@@ -17,6 +17,7 @@ const SectionSchema = new mongoose.Schema({
         }
     ],
     order: {type: Number,required: true},
+    approvalStatus: {type: Boolean,default: true,required: false},
   },{ timestamps: true });
   
   const Section = mongoose.model('section', SectionSchema);

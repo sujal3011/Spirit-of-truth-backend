@@ -9,6 +9,7 @@ const CourseSchema = new mongoose.Schema({
     },
     title: {type: String,required: true},
     publishedStatus: {type: Boolean,default: false,required: false},
+    approvalStatus: {type: Boolean,default: true,required: false},
     courseType: {type:String,default:'individual',required:false},  //individual or bundle
     modules: [
       {

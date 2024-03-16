@@ -15,6 +15,7 @@ const Course = require("../../models/course/Course");
 const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
+const CreationRequest = require("../../models/instructors/CreationRequest");
 const authenticateAdmin =  require("../../middleware/authenticateAdmin");
 const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
 
@@ -32,7 +33,7 @@ conn.once('open', () => {
 
 // Creating a new course
 router.post(
-    "/create",
+    "/create",authenticateAdminInstructor,
     [
       body("title", "Enter a valid title ").isLength({ min: 1 }),
     ],
@@ -43,18 +44,34 @@ router.post(
         console.log("something is invalid");
         return res.status(400).json({ success: false, errors: errors.array() });
       }
+      
       try {
+
+        let approvalStatus;
+
+        // instructor is trying to create a new course
+        if (req.user.role === 'instructor') approvalStatus = false;
+        // admin is trying to create a new course
+        else approvalStatus = true;
+        
 
         let courseData = {
           title: req.body.title,
           creatorId: req.body.creatorId,
           isPaid:(req.body.courseType==='paid' ? true : false),
           coursePrice:Number(req.body.coursePrice),
+          approvalStatus: approvalStatus
         };
-        if (req.body.userRole === "instructor") {
+      
+        if (req.user.role === 'instructor') {
           courseData.instructors = [req.body.creatorId];
         }
         let course = await Course.create(courseData);
+        if (req.user.role === 'instructor'){
+          let creationrequest = await CreationRequest.create({entityId:course._id,entityType:'Course'});
+        }
+
+
         res.status(201).json({ success: true, course: course });
 
       } catch (err) {
@@ -64,37 +81,6 @@ router.post(
     }
 );
 
-// Getting all courses
-// router.get(
-//   "/", async (req, res) => {
-//     try {
-//       const { publishedStatus,courseType } = req.query;
-//       let courses;
-//       if(courseType==="individual"){
-
-//         if(publishedStatus==="all") courses = await Course.find({courseType:'individual'});
-//         else if(publishedStatus==="published") courses = await Course.find({courseType:'individual',publishedStatus: true});
-//         else courses = await Course.find({courseType:'individual',publishedStatus: false});
-//       }
-//       else{
-
-//         if(publishedStatus==="all") courses = await Course.find();
-//         else if(publishedStatus==="published") courses = await Course.find({publishedStatus: true});
-//         else courses = await Course.find({publishedStatus: false});
-
-//       }
-
-//     // Sort courses alphabetically by title
-//     courses.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
-
-//       res.status(201).json({ success: true, courses: courses});
-
-//     } catch (err) {
-//       res.status(500).send("Internal server error");
-//       console.log(err);
-//     }
-//   }
-// );
 
 router.get(
   "/", async (req, res) => {

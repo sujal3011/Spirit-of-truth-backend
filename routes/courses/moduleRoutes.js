@@ -14,6 +14,10 @@ const Course = require("../../models/course/Course");
 const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
+const CreationRequest = require("../../models/instructors/CreationRequest");
+
+const authenticateAdmin =  require("../../middleware/authenticateAdmin");
+const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
 
 const mongoose = require('mongoose');
 const mongoURL = process.env.MONGODB_URL
@@ -30,7 +34,7 @@ conn.once('open', () => {
 
 // Creating a new module
 router.post(
-    "/create/:courseId",
+    "/create/:courseId",authenticateAdminInstructor,
     [
       body("title", "Enter a valid title ").isLength({ min: 1 }),
     ],
@@ -56,16 +60,30 @@ router.post(
           order = Math.max(...modules.map((module) => module.order), 0) + 1;
         }
 
-
+        let approvalStatus;
+        if (req.user.role === 'instructor') {
+          approvalStatus = false;
+        } else {
+          approvalStatus = true;
+        }
 
         let module = await Module.create({
             title: req.body.title,
             courseId: req.params.courseId,
             order: order,
+            approvalStatus: approvalStatus
         });
         course.modules.push(module._id);
         await course.save();
 
+        if (req.user.role === 'instructor'){
+          if(course.approvedStatus===true){
+
+            //creating create request for this module only if its corresponding course is already approved
+            let creationrequest = await CreationRequest.create({entityId:module._id,entityType:'Module'});
+          }
+
+        }
         res.status(201).json({ success: true, module: module,updatedCourse:course});
 
       } catch (err) {

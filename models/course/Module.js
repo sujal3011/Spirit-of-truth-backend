@@ -15,6 +15,7 @@ const ModuleSchema = new mongoose.Schema({
             ref: 'section'
         }
     ],
+    approvalStatus: {type: Boolean,default: true,required: false},
   },{ timestamps: true });
   
   const Module = mongoose.model('module', ModuleSchema);

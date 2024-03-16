@@ -15,6 +15,9 @@ const File = require("../../models/course/File");
 const Module = require("../../models/course/Module");
 const Section = require("../../models/course/Section");
 
+const authenticateAdmin =  require("../../middleware/authenticateAdmin");
+const authenticateAdminInstructor =  require("../../middleware/authenticateAdminInstructor");
+
 const mongoose = require('mongoose');
 const mongoURL = process.env.MONGODB_URL
 const conn = mongoose.createConnection(mongoURL);
@@ -29,7 +32,7 @@ conn.once('open', () => {
 
 //Creating a new section
 router.post(
-    "/create/:moduleId",
+    "/create/:moduleId",authenticateAdminInstructor,
     [
       body("title", "Enter a valid title ").isLength({ min: 1 }),
       body("body", "Enter a valid body ").isLength({ min: 1 }),
@@ -57,12 +60,21 @@ router.post(
           order = Math.max(...sections.map((section) => section.order), 0) + 1;
         }
 
+        let approvalStatus;
+        if (req.user.role === 'instructor') {
+          approvalStatus = false;
+        } else {
+          approvalStatus = true;
+        }
+
         let section = await Section.create({
             title: req.body.title,
             body: req.body.body,
             moduleId: req.params.moduleId,
             videoUrl: req.body.videoUrl,
             order: order,
+            approvalStatus: approvalStatus
+
         });
         module.sections.push(section._id);
         await module.save();

@@ -82,6 +82,9 @@ app.use('/api/coursebundle',courseBundleRoutes);
 const courseCompletionRoutes=require('./routes/courses/courseCompletionRoutes');
 app.use('/api/coursecompletion',courseCompletionRoutes);
 
+const createRequestRoutes=require('./routes/createRequests/createRequestRoutes');
+app.use('/api/createrequest',createRequestRoutes);
+
 
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);
