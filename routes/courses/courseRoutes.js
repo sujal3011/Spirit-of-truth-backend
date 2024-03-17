@@ -225,19 +225,25 @@ router.post('/unenroll/:courseId',async (req, res) => {
 
 
 // Fetching enrolled courses of user
-router.get('/enrolled/:userId',async (req, res) => {
+router.get('/enrolled/:userId', async (req, res) => {
   try {
-      const userId = req.params.userId;
-      const user = await User.findById(userId).populate('coursesEnrolled');
-        if (!user) {
-            return res.status(404).json({ success:false, message: 'User not found' });
-        }
-        res.status(200).json({ success:true, enrolledCourses:user.coursesEnrolled });
+    const userId = req.params.userId;
+    const user = await User.findById(userId).populate({
+      path: 'coursesEnrolled',
+      options: { sort: { title: 1 } } // Sort courses alphabetically by title
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, enrolledCourses: user.coursesEnrolled });
   } catch (err) {
-      console.error(err);
-      res.status(500).json({ success:false, message: 'Server Error' });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 });
+
 
 // Updating a Course
 router.put('/:courseId', async (req, res) => {
