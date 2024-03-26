@@ -179,5 +179,36 @@ router.delete('/:sectionId', async (req, res) => {
   }
 });
 
+// Updating sections Order
+router.put('/updateSectionsOrder/:moduleId', async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+    const { sectionsOrder } = req.body;
+
+    // Find the module by moduleId
+    const module = await Module.findById(moduleId);
+    if (!module) {
+      return res.status(404).json({ success: false, message: 'Module not found' });
+    }
+
+    // Update section orders based on the received data
+    sectionsOrder.forEach(async (sectionOrder) => {
+      const { sectionId, order } = sectionOrder;
+
+      // Find the section by sectionId and update its order
+      const updatedSection = await Section.findByIdAndUpdate(
+        sectionId,
+        { $set: { order: order } },
+        { new: true }
+      );
+    });
+
+    res.status(200).json({ success: true, message: 'Section orders updated successfully'});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

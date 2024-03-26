@@ -18,7 +18,7 @@ const EditProfileSchema = new mongoose.Schema({
     city: {type: String,required: true},
     zipcode: {type: String,required: true},
     country: {type: String,required: true},
-    phone: {type: Number,required: true,unique: true},
+    phone: {type: String,required: true,unique: true},
     birthdate: {type: Date,required: true},
     image: { type:String,required: true},
     dralawalletaddress: {type: String,required: false},
