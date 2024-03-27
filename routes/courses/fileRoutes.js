@@ -84,34 +84,33 @@ router.get('/fetch/:sectionId', async (req, res) => {
 router.get('/downloadpdf/:id', async (req, res) => {
 
   try {
-      console.log("downloading file");
     let referenceFile = await File.findById(req.params.id);
-    console.log(referenceFile);
-    gfs.find({ _id: new mongoose.Types.ObjectId(referenceFile.fileId) }).toArray((err, files) => {
+    const objectId=new mongoose.Types.ObjectId(referenceFile.fileId);
+    const files = await gfs.find({_id: objectId }).toArray();
+
       if (!files[0] || files.length === 0) {
         console.log("File not found");
         return res.status(404).json({
           err: 'No file exists'
         });
       }
-      console.log(files[0]);
+
       const downloadStream = gfs.openDownloadStream(files[0]._id);  
-      console.log(referenceFile.originalname);
       const originalFileName = referenceFile.originalname;
       res.set({
-        'Content-Type': 'application/octet-stream',
+        'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${originalFileName}"`,
         'file-Name': `${originalFileName}`,
       });
       res.set('Access-Control-Expose-Headers', 'file-Name');
       downloadStream.pipe(res);
-    });
 
   } catch (error) {
     console.log("Error");
     res.status(500).json(error);
   }
 });
+
 
 // Deleting a pdf
 router.delete('/:id', async (req, res) => {
