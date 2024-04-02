@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const CreationRequestSchema = new mongoose.Schema({
 
+    creatorId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'user'
+      },
     entityId: {
         type: mongoose.Schema.Types.Mixed,
         refPath: 'entityType'

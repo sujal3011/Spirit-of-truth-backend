@@ -68,7 +68,7 @@ router.post(
         }
         let course = await Course.create(courseData);
         if (req.user.role === 'instructor'){
-          let creationrequest = await CreationRequest.create({entityId:course._id,entityType:'Course'});
+          let creationrequest = await CreationRequest.create({entityId:course._id,entityType:'Course',creatorId: req.body.creatorId});
         }
 
 

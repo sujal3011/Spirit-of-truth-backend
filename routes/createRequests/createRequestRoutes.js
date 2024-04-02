@@ -75,4 +75,27 @@ router.put('/approve/course/:courseId', async (req, res) => {
     }
 });
 
+//Approving module creation request
+router.put('/approve/module/:moduleId', async (req, res) => {
+    const moduleId = req.params.moduleId;
+    try {
+        // Update course approvalStatus and publishedStatus
+        const updatedModule = await Module.findByIdAndUpdate(moduleId, {
+            approvalStatus: true,
+        }, { new: true });
+
+        // Update approvalStatus for all sections of the module
+        await Section.updateMany({ moduleId: moduleId }, { approvalStatus: true });
+
+         // Delete entry from CreationRequest schema
+         const entityIdObj = new mongoose.Types.ObjectId(moduleId);
+         await CreationRequest.deleteOne({ entityId: entityIdObj, entityType: 'Module' });
+
+        res.status(200).json({ message: 'Modules and sections approved successfully', updatedModule });
+    } catch (error) {
+        console.error('Error approving course:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;

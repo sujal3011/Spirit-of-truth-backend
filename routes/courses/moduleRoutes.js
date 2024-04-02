@@ -77,10 +77,10 @@ router.post(
         await course.save();
 
         if (req.user.role === 'instructor'){
-          if(course.approvedStatus===true){
+          if(course.approvalStatus===true){
 
             //creating create request for this module only if its corresponding course is already approved
-            let creationrequest = await CreationRequest.create({entityId:module._id,entityType:'Module'});
+            let creationrequest = await CreationRequest.create({entityId:module._id,entityType:'Module',creatorId: req.body.creatorId});
           }
 
         }
