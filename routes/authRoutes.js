@@ -305,6 +305,7 @@ router.post(
           dralawalletaddress: req.body.dralaWalletAdress,
           email: req.body.email,
           user: req.body.user,
+          isVerifiedByAdmin: false,
         });
         user.accountStatus = "profile_created";
 
@@ -572,23 +573,70 @@ router.delete("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const user = await User.findById(userId);
-    const profile = await Profile.findOne({ user: userId });
+    // const user = await User.findById(userId);
+    // const profile = await Profile.findOne({ user: userId });
 
-    if (!user) {
+    // if (!user) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "User or profile not found" });
+    // }
+    // await user.remove();
+    // await profile.remove();
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
       return res
         .status(404)
-        .json({ success: false, message: "User or profile not found" });
+        .json({ success: false, message: "User not found" });
     }
-    await user.remove();
-    await profile.remove();
+    const deletedProfile = await Profile.deleteOne({ user: userId });
 
     res.json({
       success: true,
       message: "User and profile deleted successfully",
     });
   } catch (error) {
+    console.log("error", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get unverified Profiles
+
+router.get("/unverified-profiles", async (req, res) => {
+  try {
+    const profiles = await Profile.find({ verifiedByAdmin: false });
+    if (!profiles) {
+      console.log("no profiles found");
+    }
+    console.log("prfodiles", profiles);
+    return res.status(200).send({ success: true, profiles });
+  } catch (error) {
+    return res.status(404).json({ message: "Couldn't fetch profiles" });
+  }
+});
+
+router.post("/verify-profile", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(404).json({ message: "no userId provided" });
+    }
+    const profile = await Profile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ message: "no profile found" });
+    }
+
+    profile.verifiedByAdmin = true;
+    await profile.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "profile verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify profile" });
   }
 });
 
