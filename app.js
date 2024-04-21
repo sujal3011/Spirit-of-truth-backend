@@ -51,7 +51,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-const auth = require("./routes/authRoutes");
+const { router: auth } = require("./routes/authRoutes");
 app.use("/api/auth", auth);
 
 const editRoutes = require("./routes/editRoutes");
@@ -86,6 +86,12 @@ app.use("/api/coursecompletion", courseCompletionRoutes);
 
 const createRequestRoutes = require("./routes/createRequests/createRequestRoutes");
 app.use("/api/createrequest", createRequestRoutes);
+
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
+
+// const paymentRoutes = require("./routes/paymentRoutes");
+// app.use("/api/payments", paymentRoutes);
 
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);

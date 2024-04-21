@@ -10,10 +10,11 @@ const otpController = require("../controllers/otpController");
 const axios = require("axios");
 const Token = require("../models/Token");
 const crypto = require("crypto");
-const mailSender = require("../utils/mailSender");
+const { mailSender, verifyEmail } = require("../utils/mailSender");
 const multer = require("multer");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
+
 const secret_key = process.env.SECRET_KEY;
 
 router.post("/send-otp", otpController.sendOTP);
@@ -640,4 +641,51 @@ router.post("/verify-profile", async (req, res) => {
   }
 });
 
-module.exports = router;
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+    console.log("verificationtoken", verificationToken);
+    const user = await User.findOne({ email });
+    user.emailVerificationToken = verificationToken;
+    const info = await verifyEmail(email, verificationToken);
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "email verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify email" });
+  }
+});
+router.get("/verify-email/:verificationToken", async (req, res) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await User.findOne({
+      emailVerificationToken: verificationToken,
+    });
+    console.log("verificationtoken", verificationToken);
+    console.log("user", user);
+    console.log("starting function");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user does not exist" });
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+    console.log("done editing");
+    return res
+      .status(200)
+      .json({ success: true, user, message: "email verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify email" });
+  }
+});
+
+module.exports = { router, verifyRecaptcha };

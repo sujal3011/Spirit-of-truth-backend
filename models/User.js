@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema(
     accountStatus: { type: String, default: "active", required: false },
 
     isUserBlocked: { type: Boolean, default: false, required: false },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String },
     coursesAssigned: [
       {
         type: mongoose.Schema.Types.ObjectId,
