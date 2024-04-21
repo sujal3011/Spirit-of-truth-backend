@@ -10,10 +10,11 @@ const otpController = require("../controllers/otpController");
 const axios = require("axios");
 const Token = require("../models/Token");
 const crypto = require("crypto");
-const mailSender = require("../utils/mailSender");
+const { mailSender, verifyEmail } = require("../utils/mailSender");
 const multer = require("multer");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
+
 const secret_key = process.env.SECRET_KEY;
 
 router.post("/send-otp", otpController.sendOTP);
@@ -305,6 +306,7 @@ router.post(
           dralawalletaddress: req.body.dralaWalletAdress,
           email: req.body.email,
           user: req.body.user,
+          isVerifiedByAdmin: false,
         });
         user.accountStatus = "profile_created";
 
@@ -572,24 +574,118 @@ router.delete("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const user = await User.findById(userId);
-    const profile = await Profile.findOne({ user: userId });
+    // const user = await User.findById(userId);
+    // const profile = await Profile.findOne({ user: userId });
 
-    if (!user) {
+    // if (!user) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "User or profile not found" });
+    // }
+    // await user.remove();
+    // await profile.remove();
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
       return res
         .status(404)
-        .json({ success: false, message: "User or profile not found" });
+        .json({ success: false, message: "User not found" });
     }
-    await user.remove();
-    await profile.remove();
+    const deletedProfile = await Profile.deleteOne({ user: userId });
 
     res.json({
       success: true,
       message: "User and profile deleted successfully",
     });
   } catch (error) {
+    console.log("error", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-module.exports = router;
+// Get unverified Profiles
+
+router.get("/unverified-profiles", async (req, res) => {
+  try {
+    const profiles = await Profile.find({ verifiedByAdmin: false });
+    if (!profiles) {
+      console.log("no profiles found");
+    }
+    console.log("prfodiles", profiles);
+    return res.status(200).send({ success: true, profiles });
+  } catch (error) {
+    return res.status(404).json({ message: "Couldn't fetch profiles" });
+  }
+});
+
+router.post("/verify-profile", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(404).json({ message: "no userId provided" });
+    }
+    const profile = await Profile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ message: "no profile found" });
+    }
+
+    profile.verifiedByAdmin = true;
+    await profile.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "profile verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify profile" });
+  }
+});
+
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+    console.log("verificationtoken", verificationToken);
+    const user = await User.findOne({ email });
+    user.emailVerificationToken = verificationToken;
+    const info = await verifyEmail(email, verificationToken);
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "email verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify email" });
+  }
+});
+router.get("/verify-email/:verificationToken", async (req, res) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await User.findOne({
+      emailVerificationToken: verificationToken,
+    });
+    console.log("verificationtoken", verificationToken);
+    console.log("user", user);
+    console.log("starting function");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user does not exist" });
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+    console.log("done editing");
+    return res
+      .status(200)
+      .json({ success: true, user, message: "email verified successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(404).json({ message: "failed to verify email" });
+  }
+});
+
+module.exports = { router, verifyRecaptcha };
