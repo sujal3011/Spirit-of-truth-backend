@@ -172,6 +172,7 @@ router.post("/enroll/:courseId", async (req, res) => {
     const courseId = req.params.courseId;
     const { userId } = req.body;
     const user = await User.findById(userId);
+    const course = await Course.findById(courseId);
     if (!user) {
       return res
         .status(404)
@@ -183,7 +184,62 @@ router.post("/enroll/:courseId", async (req, res) => {
         message: "User is already enrolled in this course",
       });
     }
+
+    // if (course.isPaid) {
+    //   const userHasPaid = course.purchasedBy.find((id) => id === userId);
+    //   if (!userHasPaid) {
+    //     return res.status(404).json({
+    //       success: false,
+    //       message: "User has not paid for the course",
+    //     });
+    //   }
+    // }
+
+    console.log("user enrolled un course");
     user.coursesEnrolled.push(courseId);
+    course.purchasedBy.push(userId);
+    await course.save();
+    await user.save();
+    return res.status(200).json({ success: true, user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+router.post("/paidEnroll/:courseId", async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    const course = await Course.findById(courseId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    if (user.coursesEnrolled.includes(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already enrolled in this course",
+      });
+    }
+
+    if (course.isPaid) {
+      console.log("buyers", course.purchasedBy);
+
+      const userHasPaid = course.purchasedBy.find((id) => id === userId);
+      console.log("usehas paid", userHasPaid);
+      if (!userHasPaid) {
+        return res.status(404).json({
+          success: false,
+          message: "User has not paid for the course",
+        });
+      }
+    }
+    user.coursesEnrolled.push(courseId);
+    course.purchasedBy.push(userId);
+    await course.save();
     await user.save();
     return res.status(200).json({ success: true, user });
   } catch (err) {

@@ -7,8 +7,11 @@ const authenticateAdminInstructor = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({ error: "Enter a token to authenticate" });
   }
+  console.log("token", token);
   try {
     const data = jwt.verify(token, secret_key);
+
+    console.log("user role", data.user.role);
     if (data.user.role !== "admin" && data.user.role !== "instructor") {
       return res
         .status(403)

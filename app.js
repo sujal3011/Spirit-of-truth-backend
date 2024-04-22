@@ -90,8 +90,8 @@ app.use("/api/createrequest", createRequestRoutes);
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-// const paymentRoutes = require("./routes/paymentRoutes");
-// app.use("/api/payments", paymentRoutes);
+const transactionRoutes = require("./routes/transactionRoutes");
+app.use("/api/transactions", transactionRoutes);
 
 app.listen(port, () => {
   console.log(`Express app is listening on port ${port}`);

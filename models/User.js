@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema(
     isUserBlocked: { type: Boolean, default: false, required: false },
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String },
+    donations: [{ type: mongoose.Schema.Types.ObjectId, ref: "Donation" }],
     coursesAssigned: [
       {
         type: mongoose.Schema.Types.ObjectId,

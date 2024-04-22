@@ -17,6 +17,7 @@ const CourseSchema = new mongoose.Schema(
         ref: "module",
       },
     ],
+
     instructors: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +26,7 @@ const CourseSchema = new mongoose.Schema(
     ],
     isPaid: { type: Boolean, default: false, required: false },
     coursePrice: { type: Number, default: 0, required: false },
-
+    purchasedBy: [{ type: String }],
     prerequisiteCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,
