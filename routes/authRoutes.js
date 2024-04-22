@@ -612,7 +612,7 @@ router.get("/unverified-profiles", async (req, res) => {
     if (!profiles) {
       console.log("no profiles found");
     }
-    console.log("prfodiles", profiles);
+
     return res.status(200).send({ success: true, profiles });
   } catch (error) {
     return res.status(404).json({ message: "Couldn't fetch profiles" });
@@ -646,7 +646,7 @@ router.post("/verify-email", async (req, res) => {
     const { email } = req.body;
 
     const verificationToken = crypto.randomBytes(20).toString("hex");
-    console.log("verificationtoken", verificationToken);
+
     const user = await User.findOne({ email });
     user.emailVerificationToken = verificationToken;
     const info = await verifyEmail(email, verificationToken);
@@ -667,9 +667,7 @@ router.get("/verify-email/:verificationToken", async (req, res) => {
     const user = await User.findOne({
       emailVerificationToken: verificationToken,
     });
-    console.log("verificationtoken", verificationToken);
-    console.log("user", user);
-    console.log("starting function");
+
     if (!user) {
       return res
         .status(404)
@@ -678,7 +676,7 @@ router.get("/verify-email/:verificationToken", async (req, res) => {
 
     user.isEmailVerified = true;
     await user.save();
-    console.log("done editing");
+
     return res
       .status(200)
       .json({ success: true, user, message: "email verified successfully" });
