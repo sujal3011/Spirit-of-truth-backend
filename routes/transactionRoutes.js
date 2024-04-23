@@ -121,7 +121,7 @@ router.post("/buy-course", async (req, res) => {
     }
 
     const newTransaction = await Transaction.create({
-      user: userId,
+      userId: userId,
       orderId,
       courseId,
       purchasedItems: course.title,
