@@ -129,10 +129,10 @@ router.post(
           .json({ success, error: "Please enter correct credentials" });
       }
       // verifying captcha
-      const isRecaptchaValid = await verifyRecaptcha(captchaToken);
-      if (!isRecaptchaValid) {
-        return res.status(400).json({ error: "reCAPTCHA verification failed" });
-      }
+      // const isRecaptchaValid = await verifyRecaptcha(captchaToken);
+      // if (!isRecaptchaValid) {
+      //   return res.status(400).json({ error: "reCAPTCHA verification failed" });
+      // }
 
       const data = {
         user: {
@@ -643,13 +643,13 @@ router.post("/verify-profile", async (req, res) => {
 
 router.post("/verify-email", async (req, res) => {
   try {
-    const { email } = req.body;
-
+    const { email, origin } = req.body;
+    console.log("origin", origin);
     const verificationToken = crypto.randomBytes(20).toString("hex");
 
     const user = await User.findOne({ email });
     user.emailVerificationToken = verificationToken;
-    const info = await verifyEmail(email, verificationToken);
+    const info = await verifyEmail(email, verificationToken, origin);
 
     await user.save();
 

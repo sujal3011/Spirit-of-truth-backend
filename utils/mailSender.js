@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.gmail.com", // Outlook SMTP server
   port: 587,
   secure: false, // Use true for port 465, false for others
   auth: {
@@ -12,16 +12,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Encapsulate logic in an async function
 async function mailSender(email, title, body) {
   try {
     const info = await transporter.sendMail({
-      from: email, // sender address
-      to: process.env.MAIL_USER, // list of receivers
-      subject: `${title} from ${email}`, // Subject line
+      from: email,
+      to: process.env.MAIL_USER,
+      subject: `${title} from ${email}`,
       sender: email,
-      text: title, // plain text body
-      html: `<p>${body}</p>`, // html body
+      text: title,
+      html: `<p>${body}</p>`,
     });
 
     console.log("Message sent:", info.messageId);
@@ -31,28 +30,39 @@ async function mailSender(email, title, body) {
   }
 }
 
-async function verifyEmail(email, verificationToken) {
-  const env = process.env.NODE_ENV;
-
-  const url =
-    env === "Development"
-      ? process.env.REACT_APP_FRONTEND_URL_DEV
-      : process.env.REACT_APP_FRONTEND_URL_PROD;
+async function verifyEmail(email, verificationToken, origin) {
+  const url = origin;
+  console.log("url", url);
+  // env === "Development"
+  //   ? process.env.REACT_APP_FRONTEND_URL_DEV
+  //   : process.env.REACT_APP_FRONTEND_URL_PROD;
 
   try {
     const info = await transporter.sendMail({
-      from: `<no-reply@gmail.com>`, // sender address
-      to: email, // list of receivers
-      subject: `Confirm Spirit of Truth N.A.C. Login`, // Subject line
+      from: `<no-reply@gmail.com>`,
+      to: email,
+      subject: `Confirm Spirit of Truth N.A.C. Login`,
 
-      text: "Verification email", // plain text body
-      html: `<p>Thank you for joining the Spirit of Truth Native American Church educational portal.</p>
-      <p>Before you can log into your portal, you must confirm your email by clicking on the button below.</p>
-      <button><a href="${url}/Signin/${verificationToken}">CONFIRM</a></button>
-      <p>If you have any issues, please <a href=${url}/ContactUs>Contact Us</a>.</p>
-      <p>Sincerely,</p>
-      <p>Website Administrator</p>
-      <p>Spirit of Truth Native American Church</p>`, // html body
+      text: "Verification email",
+      html: `<style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+      }
+      a {
+        color: #333;
+        text-decoration: none;
+      }
+    </style>
+    <p>Thank you for joining the Spirit of Truth Native American Church educational portal.</p>
+    <p>Before you can log into your portal, you must confirm your email by clicking on the button below.</p>
+    <button><a href="${url}/Signin/${verificationToken}">CONFIRM</a></button>
+    <p>If you have any issues, please <a href="${url}/ContactUs">Contact Us</a>.</p>
+    <p>Sincerely,</p>
+    <p>Website Administrator</p>
+    <p>Spirit of Truth Native American Church</p>
+  `,
+      contentType: "text/html",
     });
 
     console.log("Message sent:", info.messageId);
