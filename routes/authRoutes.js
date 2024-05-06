@@ -10,7 +10,7 @@ const otpController = require("../controllers/otpController");
 const axios = require("axios");
 const Token = require("../models/Token");
 const crypto = require("crypto");
-const { mailSender, verifyEmail } = require("../utils/mailSender");
+const { mailSender, verifyEmail,forgetPasswordEmail } = require("../utils/mailSender");
 const multer = require("multer");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
@@ -40,7 +40,7 @@ router.post(
     try {
       let user = await User.findOne({ email: email });
       if (user) {
-        return res.status(400).json({
+        return res.status(409).json({
           success,
           error: "A user with this email address already exists",
         });
@@ -413,56 +413,6 @@ router.put(
   }
 );
 
-//sending the password reset email
-router.post("/reset-password", async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user)
-      return res.status(400).send("User with given email doesn't exist");
-
-    let token = await Token.findOne({ userId: user._id });
-    if (!token) {
-      token = await new Token({
-        userId: user._id,
-        token: crypto.randomBytes(32).toString("hex"),
-      }).save();
-    }
-    // Link needs to be changed
-    const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
-    await mailSender(user.email, "Password reset", link);
-
-    res.send("password reset link sent to your email account");
-  } catch (error) {
-    res.send("An error occured");
-    console.log(error);
-  }
-});
-
-//reseting the password
-router.post("/reset-password/:userId/:token", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId);
-    if (!user) return res.status(400).send("invalid link or expired");
-
-    const token = await Token.findOne({
-      userId: user._id,
-      token: req.params.token,
-    });
-    if (!token) return res.status(400).send("Invalid link or expired");
-
-    const salt = await bcrypt.genSalt(10);
-    const secPass = await bcrypt.hash(req.body.password, salt);
-    user.password = secPass;
-    await user.save();
-    await token.delete();
-
-    res.send("password reset sucessfully.");
-  } catch (error) {
-    res.send("An error occured");
-    console.log(error);
-  }
-});
-
 //getting all profiles
 router.get("/get-all-profiles", async (req, res) => {
   try {
@@ -661,6 +611,8 @@ router.post("/verify-email", async (req, res) => {
     return res.status(404).json({ message: "failed to verify email" });
   }
 });
+
+
 router.get("/verify-email/:verificationToken", async (req, res) => {
   try {
     const { verificationToken } = req.params;
@@ -685,5 +637,58 @@ router.get("/verify-email/:verificationToken", async (req, res) => {
     return res.status(404).json({ message: "failed to verify email" });
   }
 });
+
+router.post("/forgetpassword-email", async (req, res) => {
+  try {
+    console.log("api to send password email");
+    const { email, origin } = req.body;
+    console.log("origin", origin);
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+
+    const user = await User.findOne({ email });
+    if(!user){
+      return res.status(404).json({success:false,message:"User not found" });
+    }
+    user.emailVerificationToken = verificationToken;
+    const info = await forgetPasswordEmail(email, verificationToken, origin);
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "forget password email send successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({ message: "failed to send email" });
+  }
+});
+
+router.post("/reset-password/:verificationToken",async (req,res)=>{
+  try {
+    const {email,password}=req.body;
+    const {verificationToken}=req.params;
+
+    const user=await User.findOne({emailVerificationToken:verificationToken});
+    if(!user){
+      return res.status(404).json({success:false,message:"User not found"});
+    }
+    console.log(user);
+    if(user.email!==email){
+      return res.status(401).json({success:false,message:"User not authorized"});
+    }
+    const salt = await bcrypt.genSalt(10);
+    const secPass = await bcrypt.hash(password, salt);
+    user.password=secPass;
+    user.save();
+    return res.status(200).json({success:true,message:"Password updated successfully"});
+
+
+  } catch (error) {
+    return res.status(500).json({success:false,message:"Failed to update password"});
+  }
+});
+
+
+
 
 module.exports = { router, verifyRecaptcha };

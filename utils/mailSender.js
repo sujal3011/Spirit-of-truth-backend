@@ -4,8 +4,10 @@ dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com", // Outlook SMTP server
+  // host: "smtp.office365.com", // Outlook SMTP server
   port: 587,
   secure: false, // Use true for port 465, false for others
+  // secure: true, 
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
@@ -39,7 +41,8 @@ async function verifyEmail(email, verificationToken, origin) {
 
   try {
     const info = await transporter.sendMail({
-      from: `<no-reply@gmail.com>`,
+      // from: `<no-reply@gmail.com>`,
+      from: `donotreply@spiritoftruthnativeamericanchurch.org`,
       to: email,
       subject: `Confirm Spirit of Truth N.A.C. Login`,
 
@@ -72,7 +75,47 @@ async function verifyEmail(email, verificationToken, origin) {
   }
 }
 
-module.exports = { mailSender, verifyEmail };
+async function forgetPasswordEmail(email, resetToken, origin) {
+  const url = origin;
+  console.log("url", url);
+
+  try {
+    const info = await transporter.sendMail({
+      from: `donotreply@spiritoftruthnativeamericanchurch.org`,
+      to: email,
+      subject: `Password Reset Request`,
+
+      text: "Password reset email",
+      html: `<style>
+        body {
+          font-family: sans-serif;
+          margin: 0;
+        }
+        a {
+          color: #333;
+          text-decoration: none;
+        }
+      </style>
+      <p>We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
+      <p>To reset your password, click the link below:</p>
+      <button><a href="${url}/CreateNewPass/${resetToken}">RESET PASSWORD</a></button> <!-- Update URL -->
+      <p>If you have any issues, please <a href="${url}/contact">Contact Us</a>.</p>
+      <p>Best regards,</p>
+      <p>Website Administrator</p>
+      <p>Spirit of Truth Native American Church</p>
+    `,
+      contentType: "text/html",
+    });
+
+    console.log("Message sent:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+}
+
+
+module.exports = { mailSender, verifyEmail,forgetPasswordEmail };
 
 // const mailSender = async (email, title, body) => {
 //   try {
