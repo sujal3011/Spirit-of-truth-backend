@@ -14,6 +14,7 @@ const { mailSender, verifyEmail,forgetPasswordEmail } = require("../utils/mailSe
 const multer = require("multer");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
+const EditProfile = require("../models/EditProfile");
 
 const secret_key = process.env.SECRET_KEY;
 
@@ -523,18 +524,6 @@ router.put("/admin-change-password/:userId", async (req, res) => {
 router.delete("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-
-    // const user = await User.findById(userId);
-    // const profile = await Profile.findOne({ user: userId });
-
-    // if (!user) {
-    //   return res
-    //     .status(404)
-    //     .json({ success: false, message: "User or profile not found" });
-    // }
-    // await user.remove();
-    // await profile.remove();
-
     const deletedUser = await User.findByIdAndDelete(userId);
 
     if (!deletedUser) {
@@ -542,11 +531,16 @@ router.delete("/:userId", async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+
+    //Deleting the user profile
     const deletedProfile = await Profile.deleteOne({ user: userId });
+
+    //Deleting the edit requests of that user
+    const deletedEditRequests = await EditProfile.deleteMany({email:deletedUser.email});
 
     res.json({
       success: true,
-      message: "User and profile deleted successfully",
+      message: "User and related data deleted successfully",
     });
   } catch (error) {
     console.log("error", error);
