@@ -18,6 +18,11 @@ const CourseSchema = new mongoose.Schema(
       },
     ],
 
+    courseLetterBody: {
+      type: String,
+      default: "",
+    },
+
     instructors: [
       {
         type: mongoose.Schema.Types.ObjectId,
