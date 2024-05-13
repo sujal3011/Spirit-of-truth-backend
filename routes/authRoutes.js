@@ -10,7 +10,11 @@ const otpController = require("../controllers/otpController");
 const axios = require("axios");
 const Token = require("../models/Token");
 const crypto = require("crypto");
-const { mailSender, verifyEmail,forgetPasswordEmail } = require("../utils/mailSender");
+const {
+  mailSender,
+  verifyEmail,
+  forgetPasswordEmail,
+} = require("../utils/mailSender");
 const multer = require("multer");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../middleware/authenticateAdminInstructor");
@@ -536,7 +540,9 @@ router.delete("/:userId", async (req, res) => {
     const deletedProfile = await Profile.deleteOne({ user: userId });
 
     //Deleting the edit requests of that user
-    const deletedEditRequests = await EditProfile.deleteMany({email:deletedUser.email});
+    const deletedEditRequests = await EditProfile.deleteMany({
+      email: deletedUser.email,
+    });
 
     res.json({
       success: true,
@@ -606,7 +612,6 @@ router.post("/verify-email", async (req, res) => {
   }
 });
 
-
 router.get("/verify-email/:verificationToken", async (req, res) => {
   try {
     const { verificationToken } = req.params;
@@ -640,49 +645,57 @@ router.post("/forgetpassword-email", async (req, res) => {
     const verificationToken = crypto.randomBytes(20).toString("hex");
 
     const user = await User.findOne({ email });
-    if(!user){
-      return res.status(404).json({success:false,message:"User not found" });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     user.emailVerificationToken = verificationToken;
     const info = await forgetPasswordEmail(email, verificationToken, origin);
 
     await user.save();
 
-    return res
-      .status(200)
-      .json({ success: true, message: "forget password email send successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "forget password email send successfully",
+    });
   } catch (error) {
     console.log("error", error);
     return res.status(500).json({ message: "failed to send email" });
   }
 });
 
-router.post("/reset-password/:verificationToken",async (req,res)=>{
+router.post("/reset-password/:verificationToken", async (req, res) => {
   try {
-    const {email,password}=req.body;
-    const {verificationToken}=req.params;
+    const { email, password } = req.body;
+    const { verificationToken } = req.params;
 
-    const user=await User.findOne({emailVerificationToken:verificationToken});
-    if(!user){
-      return res.status(404).json({success:false,message:"User not found"});
+    const user = await User.findOne({
+      emailVerificationToken: verificationToken,
+    });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     console.log(user);
-    if(user.email!==email){
-      return res.status(401).json({success:false,message:"User not authorized"});
+    if (user.email !== email) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User not authorized" });
     }
     const salt = await bcrypt.genSalt(10);
     const secPass = await bcrypt.hash(password, salt);
-    user.password=secPass;
+    user.password = secPass;
     user.save();
-    return res.status(200).json({success:true,message:"Password updated successfully"});
-
-
+    return res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" });
   } catch (error) {
-    return res.status(500).json({success:false,message:"Failed to update password"});
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to update password" });
   }
 });
-
-
-
 
 module.exports = { router, verifyRecaptcha };

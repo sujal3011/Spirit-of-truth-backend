@@ -421,4 +421,22 @@ router.put("/prerequisiteCourses/:courseId", async (req, res) => {
   }
 });
 
+router.post("/createLetter", async (req, res) => {
+  try {
+    const { courseLetterBody, courseId } = req.body;
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        courseLetterBody,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({ success: true, course });
+  } catch (error) {
+    console.log("letter error", error);
+    return res.status(404).json("Could not create the course letter");
+  }
+});
+
 module.exports = router;
