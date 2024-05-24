@@ -84,11 +84,13 @@ router.post("/create", async (req, res) => {
 // Fetching an instance with a given userId and courseId
 router.get("/fetch/:userId/:courseId", async (req, res) => {
   const { userId, courseId } = req.params;
+  console.log("userid", userId, "courseid", courseId);
   try {
     const courseCompletion = await CourseCompletion.findOne({
       userId,
       courseId,
     });
+    console.log("course completion", courseCompletion);
 
     if (!courseCompletion) {
       return res.status(200).json({ success: false, message: "Not found." });

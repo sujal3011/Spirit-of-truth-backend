@@ -10,8 +10,9 @@ const authenticateAdminInstructor = async (req, res, next) => {
   console.log("token", token);
   try {
     const data = jwt.verify(token, secret_key);
-
+    console.log("data", data);
     console.log("user role", data.user.role);
+
     if (data.user.role !== "admin" && data.user.role !== "instructor") {
       return res
         .status(403)

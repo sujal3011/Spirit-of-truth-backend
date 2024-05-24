@@ -122,11 +122,13 @@ router.post(
     // const {email,password}=req.body
     try {
       let user = await User.findOne({ email });
+
       if (!user) {
         return res
           .status(400)
           .json({ error: "Please enter correct credentials" });
       }
+
       const comparePass = await bcrypt.compare(password, user.password);
       if (!comparePass) {
         return res
@@ -147,6 +149,14 @@ router.post(
       };
       const token = jwt.sign(data, secret_key);
       success = true;
+
+      if (user.isUserBlocked) {
+        return res.status(403).json({
+          success: true,
+          user,
+          message: "User is blocked.Please contact the admin.",
+        });
+      }
       res.json({ success: true, token: token, user: user });
     } catch (error) {
       res.status(500).send("Internal server error");
@@ -432,6 +442,7 @@ router.get("/get-all-profiles", async (req, res) => {
 //getting profile of an user from user id
 router.get("/get-userprofile/:userId", async (req, res) => {
   const userId = req.params.userId;
+
   try {
     const profile = await Profile.findOne({ user: userId }).populate("user");
 

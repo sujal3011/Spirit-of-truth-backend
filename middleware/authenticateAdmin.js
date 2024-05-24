@@ -4,6 +4,7 @@ const secret_key = process.env.SECRET_KEY;
 
 const authenticateAdmin = async (req, res, next) => {
   const token = req.header("auth-token");
+
   if (!token) {
     return res.status(401).json({ error: "Enter a token to authenticate" });
   }

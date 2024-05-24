@@ -423,11 +423,11 @@ router.put("/prerequisiteCourses/:courseId", async (req, res) => {
 
 router.post("/createLetter", async (req, res) => {
   try {
-    const { courseLetterBody, courseId } = req.body;
+    const { body, courseId } = req.body;
     const course = await Course.findByIdAndUpdate(
       courseId,
       {
-        courseLetterBody,
+        courseLetterBody: body,
       },
       { new: true }
     );

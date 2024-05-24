@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport({
   // host: "smtp.office365.com", // Outlook SMTP server
   port: 587,
   secure: false, // Use true for port 465, false for others
-  // secure: true, 
+  // secure: true,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
@@ -34,15 +34,13 @@ async function mailSender(email, title, body) {
 
 async function verifyEmail(email, verificationToken, origin) {
   const url = origin;
-  console.log("url", url);
-  // env === "Development"
-  //   ? process.env.REACT_APP_FRONTEND_URL_DEV
-  //   : process.env.REACT_APP_FRONTEND_URL_PROD;
+
+  console.log("email", process.env.MAIL_USER);
 
   try {
     const info = await transporter.sendMail({
       // from: `<no-reply@gmail.com>`,
-      from: `donotreply@spiritoftruthnativeamericanchurch.org`,
+      from: '"donotreply@spiritoftruthnativeamericanchurch.org" <noreply@spiritoftruthnativeamericanchurch.org>',
       to: email,
       subject: `Confirm Spirit of Truth N.A.C. Login`,
 
@@ -52,18 +50,29 @@ async function verifyEmail(email, verificationToken, origin) {
         font-family: sans-serif;
         margin: 0;
       }
-      a {
-        color: #333;
-        text-decoration: none;
+      .confirm-button {
+        padding: 1rem; 
+        border-radius: 0.7rem;  
+        background-color: #303f60; 
+        color: white;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .confirm-button:hover {
+        background-color: #263b55; 
+      }
+      .confirm-button:focus {
+        outline: none;
       }
     </style>
-    <p>Thank you for joining the Spirit of Truth Native American Church educational portal.</p>
-    <p>Before you can log into your portal, you must confirm your email by clicking on the button below.</p>
-    <button><a href="${url}/Signin/${verificationToken}">CONFIRM</a></button>
-    <p>If you have any issues, please <a href="${url}/ContactUs">Contact Us</a>.</p>
-    <p>Sincerely,</p>
-    <p>Website Administrator</p>
-    <p>Spirit of Truth Native American Church</p>
+    <p style="font-family: sans-serif;">Thank you for joining the Spirit of Truth Native American Church educational portal.</p>
+    <p style="font-family: sans-serif;">Before you can log into your portal, you must confirm your email by clicking on the button below.</p>
+    <button style="padding: 0.7rem; border-radius: 0.3rem; background-color: #0066cc; color: white; transition: background-color 0.2s ease-in-out;">
+      <a href="${url}/Signin/${verificationToken}" style="text-decoration: none; color: white;">CONFIRM</a>
+    </button>
+    <p style="font-family: sans-serif;">If you have any issues, please <a href="${url}/ContactUs" style="text-decoration: none; color: blue;">Contact Us</a>.</p>
+    <p style="font-family: sans-serif;">Sincerely,</p>
+    <p style="font-family: sans-serif;">Website Administrator</p>
+    <p style="font-family: sans-serif;">Spirit of Truth Native American Church</p>
   `,
       contentType: "text/html",
     });
@@ -96,13 +105,13 @@ async function forgetPasswordEmail(email, resetToken, origin) {
           text-decoration: none;
         }
       </style>
-      <p>We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
-      <p>To reset your password, click the link below:</p>
-      <button><a href="${url}/CreateNewPass/${resetToken}">RESET PASSWORD</a></button> <!-- Update URL -->
-      <p>If you have any issues, please <a href="${url}/contact">Contact Us</a>.</p>
+      <p style="font-family: sans-serif;">We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
+      <p style="font-family: sans-serif;">To reset your password, click the link below:</p>
+      <button style="padding: 0.7rem; border-radius: 0.3rem; background-color: #0066cc; color: white; transition: background-color 0.2s ease-in-out;"><a href="${url}/CreateNewPass/${resetToken}" style="text-decoration: none; color: white;">RESET PASSWORD</a></button> <!-- Update URL -->
+     <p style="font-family: sans-serif;">If you have any issues, please <a href="${url}/contact" style="text-decoration: none; color: blue;">Contact Us</a>.</p>
       <p>Best regards,</p>
-      <p>Website Administrator</p>
-      <p>Spirit of Truth Native American Church</p>
+       <p style="font-family: sans-serif;">Website Administrator</p>
+      <p style="font-family: sans-serif;">Spirit of Truth Native American Church</p>
     `,
       contentType: "text/html",
     });
@@ -114,8 +123,7 @@ async function forgetPasswordEmail(email, resetToken, origin) {
   }
 }
 
-
-module.exports = { mailSender, verifyEmail,forgetPasswordEmail };
+module.exports = { mailSender, verifyEmail, forgetPasswordEmail };
 
 // const mailSender = async (email, title, body) => {
 //   try {
