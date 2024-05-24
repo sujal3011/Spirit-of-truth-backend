@@ -72,24 +72,40 @@ router.post("/donations", async (req, res) => {
 });
 
 //get all donations for admin
-router.post("/donations-admin", async (req, res) => {
-  const { page = 1, count = 5 } = req.query;
-  const { userId } = req.body;
-  try {
-    const parsedPage = parseInt(page);
-    const parsedCount = parseInt(count);
-    if (
-      isNaN(parsedPage) ||
-      isNaN(parsedCount) ||
-      parsedPage < 1 ||
-      parsedCount < 1
-    ) {
-      throw new Error("Invalid page or count parameter");
-    }
+// router.post("/donations-admin", async (req, res) => {
+//   const { page = 1, count = 50 } = req.query;
+//   const { userId } = req.body;
+//   try {
+//     const parsedPage = parseInt(page);
+//     const parsedCount = parseInt(count);
+//     if (
+//       isNaN(parsedPage) ||
+//       isNaN(parsedCount) ||
+//       parsedPage < 1 ||
+//       parsedCount < 1
+//     ) {
+//       throw new Error("Invalid page or count parameter");
+//     }
 
-    const donations = await Transaction.find({})
-      .skip((parsedPage - 1) * parsedCount)
-      .limit(parsedCount);
+//     const donations = await Transaction.find({})
+//       .sort({ _id: -1 })
+//       .skip((parsedPage - 1) * parsedCount)
+//       .limit(parsedCount)
+//       .exec();
+
+//     const totalDonations = await Transaction.countDocuments();
+
+//     res.status(200).json({ donations, total: totalDonations });
+//   } catch (error) {
+//     console.error(error);
+//     return res
+//       .status(400)
+//       .json({ message: error.message || "Error fetching donations" });
+//   }
+// });
+router.post("/donations-admin", async (req, res) => {
+  try {
+    const donations = await Transaction.find({}).sort({ _id: -1 });
 
     const totalDonations = await Transaction.countDocuments();
 
@@ -148,6 +164,7 @@ router.post("/buy-course", async (req, res) => {
       .json({ message: error.message || "Cannot buy the course" });
   }
 });
+
 async function generateDownloadData(donations) {
   let downloadData = "";
 
@@ -156,13 +173,12 @@ async function generateDownloadData(donations) {
 
   for (const donation of donations) {
     const user = await User.findById(donation.userId);
-    console.log("user", user);
-    console.log("donatoins", donation);
+    if (user === null) {
+      console.log("donationid", donations.userId);
+    }
     const profile = await Profile.findOne({ email: user.email });
 
-    console.log("prgoile", profile);
     donation.name = `${profile?.firstname} ${profile?.middlename} ${profile?.lastname}`;
-    console.log("name", donation.name);
   }
 
   for (const donation of donations) {
