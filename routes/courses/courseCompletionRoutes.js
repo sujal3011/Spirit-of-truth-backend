@@ -109,9 +109,23 @@ router.get("/passedCourses/:userId", async (req, res) => {
     const passedCourses = await CourseCompletion.find({
       userId,
       passingStatus: true,
-    }).populate("courseId");
+    });
+    console.log("passed coursed", passedCourses);
 
-    res.json({ success: true, courses: passedCourses });
+    const courseIds = passedCourses.map((course) => course.courseId);
+    console.log("courseids", courseIds);
+
+    const originalCourse = [];
+
+    for (const id of courseIds) {
+      const course = await Course.findOne({ _id: id });
+
+      if (course) {
+        originalCourse.push(course);
+      }
+      console.log("orginalcourse", originalCourse);
+    }
+    res.json({ success: true, courses: originalCourse, passedCourses });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

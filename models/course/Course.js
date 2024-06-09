@@ -22,6 +22,10 @@ const CourseSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    courseCertificateBody: {
+      type: String,
+      default: "",
+    },
 
     instructors: [
       {

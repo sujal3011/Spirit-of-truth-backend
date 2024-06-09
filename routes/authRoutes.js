@@ -122,11 +122,18 @@ router.post(
     // const {email,password}=req.body
     try {
       let user = await User.findOne({ email });
-
       if (!user) {
         return res
           .status(400)
           .json({ error: "Please enter correct credentials" });
+      }
+
+      if (user.isUserBlocked) {
+        return res.status(403).json({
+          success: false,
+          user,
+          message: "User is blocked.Please contact the admin.",
+        });
       }
 
       const comparePass = await bcrypt.compare(password, user.password);
@@ -150,13 +157,6 @@ router.post(
       const token = jwt.sign(data, secret_key);
       success = true;
 
-      if (user.isUserBlocked) {
-        return res.status(403).json({
-          success: true,
-          user,
-          message: "User is blocked.Please contact the admin.",
-        });
-      }
       res.json({ success: true, token: token, user: user });
     } catch (error) {
       res.status(500).send("Internal server error");
@@ -465,7 +465,10 @@ router.put("/blockuser/:userId", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     user.isUserBlocked = true;
+
     await user.save();
+
+    console.log("user id blocked", user.email);
     return res.status(200).json({ message: "User blocked successfully", user });
   } catch (err) {
     console.error(err);
@@ -539,6 +542,7 @@ router.put("/admin-change-password/:userId", async (req, res) => {
 router.delete("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
+
     const deletedUser = await User.findByIdAndDelete(userId);
 
     if (!deletedUser) {
@@ -548,6 +552,7 @@ router.delete("/:userId", async (req, res) => {
     }
 
     //Deleting the user profile
+
     const deletedProfile = await Profile.deleteOne({ user: userId });
 
     //Deleting the edit requests of that user
