@@ -20,6 +20,7 @@ const authenticateAdmin = require("../../middleware/authenticateAdmin");
 const authenticateAdminInstructor = require("../../middleware/authenticateAdminInstructor");
 
 const mongoose = require("mongoose");
+const CourseCompletion = require("../../models/course/CourseCompletion");
 
 const mongoURL = process.env.MONGODB_URL;
 const conn = mongoose.createConnection(mongoURL);
@@ -389,6 +390,7 @@ router.delete("/:courseId", async (req, res) => {
       }
       // Deleting Module
       await Module.deleteMany({ courseId });
+      await CourseCompletion.deleteMany({ courseId });
       res
         .status(200)
         .json({ success: true, message: "Course deleted successfully." });
@@ -428,6 +430,24 @@ router.post("/createLetter", async (req, res) => {
       courseId,
       {
         courseLetterBody: body,
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({ success: true, course });
+  } catch (error) {
+    console.log("letter error", error);
+    return res.status(404).json("Could not create the course letter");
+  }
+});
+
+router.post("/createCertificate", async (req, res) => {
+  try {
+    const { body, courseId } = req.body;
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      {
+        courseCertificateBody: body,
       },
       { new: true }
     );

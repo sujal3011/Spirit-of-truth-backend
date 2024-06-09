@@ -108,7 +108,7 @@ async function forgetPasswordEmail(email, resetToken, origin) {
       <p style="font-family: sans-serif;">We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
       <p style="font-family: sans-serif;">To reset your password, click the link below:</p>
       <button style="padding: 0.7rem; border-radius: 0.3rem; background-color: #0066cc; color: white; transition: background-color 0.2s ease-in-out;"><a href="${url}/CreateNewPass/${resetToken}" style="text-decoration: none; color: white;">RESET PASSWORD</a></button> <!-- Update URL -->
-     <p style="font-family: sans-serif;">If you have any issues, please <a href="${url}/contact" style="text-decoration: none; color: blue;">Contact Us</a>.</p>
+     <p style="font-family: sans-serif;">If you have any issues, please <a href="${url}/ContactUs" style="text-decoration: none; color: blue;">Contact Us</a>.</p>
       <p>Best regards,</p>
        <p style="font-family: sans-serif;">Website Administrator</p>
       <p style="font-family: sans-serif;">Spirit of Truth Native American Church</p>

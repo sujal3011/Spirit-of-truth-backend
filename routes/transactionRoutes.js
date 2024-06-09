@@ -108,7 +108,7 @@ router.post("/donations-admin", async (req, res) => {
     const donations = await Transaction.find({}).sort({ _id: -1 });
 
     const totalDonations = await Transaction.countDocuments();
-
+    console.log("donations for admin", donations);
     res.status(200).json({ donations, total: totalDonations });
   } catch (error) {
     console.error(error);
@@ -172,13 +172,23 @@ async function generateDownloadData(donations) {
   downloadData += `"amount","name","createdAt"\n`;
 
   for (const donation of donations) {
-    const user = await User.findById(donation.userId);
-    if (user === null) {
-      console.log("donationid", donations.userId);
-    }
-    const profile = await Profile.findOne({ email: user.email });
+    try {
+      const user = await User.findById(donation.userId);
 
-    donation.name = `${profile?.firstname} ${profile?.middlename} ${profile?.lastname}`;
+      if (user === null) {
+        console.log("donationid", donations.userId);
+      }
+
+      const profile = await Profile.findOne({ email: user?.email });
+
+      if (profile) {
+        donation.name = `${profile?.firstname} ${profile?.middlename} ${profile?.lastname}`;
+      } else if (!profile || !user) {
+        donation.name = `User has been deleted`;
+      }
+    } catch (error) {
+      console.log("errrrrorrr", "errror donations id", donation);
+    }
   }
 
   for (const donation of donations) {
@@ -211,13 +221,25 @@ router.get("/download", async (req, res) => {
 
 router.post("/addDonation", async (req, res) => {
   try {
-    const { amount, userId, orderId, status, purchasedItems } = req.body;
+    const {
+      amount,
+      userId,
+      orderId,
+      status,
+      purchasedItems,
+      donationDate,
+      description,
+    } = req.body;
+
+    // let newdonationDate = donationDate + "T00:00:00.000+00:00";
     const transaction = await Transaction.create({
       amount,
       userId,
       orderId,
       status,
       purchasedItems,
+      donationDate,
+      description,
     });
 
     return res.status(200).json({

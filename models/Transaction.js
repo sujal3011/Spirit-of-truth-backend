@@ -21,6 +21,8 @@ const TransactionSchema = new mongoose.Schema({
     required: true,
     default: "pending",
   },
+  donationDate: { type: Date, default: null },
+  description: { type: String, default: null },
   purchasedItems: { type: String, default: "Donation" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: null },
